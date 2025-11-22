@@ -1,0 +1,181 @@
+---
+title: "EDA"
+format: html
+editor: visual
+---
+
+# Introduction
+
+The Behavioral Risk Factor Surveillance System (BRFSS) is a health-related telephone survey that is collected annually by the CDC. Each year, the survey collects responses from over 400,000 Americans on health-related risk behaviors, chronic health conditions, and the use of preventative services. It has been conducted every year since 1984. For this ST-558 project, diabetes \_ binary \_ health \_ indicators \_ BRFSS2015.csv is a clean dataset of 253,680 survey responses to the CDC's BRFSS2015. The variables in the data set are listed and described below:
+
+1.  Diabetes_binary\
+    0 = no diabetes 1 = prediabetes 2 = diabetes
+
+2.  HighBP\
+    0 = no high BP 1 = high BP
+
+3.  HighChol\
+    0 = no high cholesterol 1 = high cholesterol
+
+4.  CholCheck\
+    0 = no cholesterol check in 5 years\
+    1 = yes cholesterol check in 5 years
+
+5.  BMI Body Mass Index
+
+6.  Smoker\
+    Have you smoked at least 100 cigarettes in your entire life?\
+    \[Note: 5 packs = 100 cigarettes\]  
+    0 = no 1 = yes
+
+7.  Stroke\
+    (Ever told) you had a stroke.\
+    0 = no 1 = yes
+
+8.  HeartDiseaseorAttack\
+    coronary heart disease (CHD) or myocardial infarction (MI)\
+    0 = no 1 = yes
+
+9.  PhysActivity\
+    physical activity in past 30 days - not including job\
+    0 = no 1 = yes
+
+10. Fruits\
+    Consume Fruit 1 or more times per day\
+    0 = no 1 = yes
+
+11. Veggies\
+    Consume Vegetables 1 or more times per day\
+    0 = no 1 = yes
+
+12. HvyAlcoholConsump\
+    (adult men \>=14 drinks per week and adult women\>=7 drinks per week)\
+    0 = no 1 = yes
+
+13. AnyHealthcare\
+    Have any kind of health care coverage, including health insurance, prepaid plans such as HMO, etc.\
+    0 = no 1 = yes
+
+14. NoDocbcCost\
+    Was there a time in the past 12 months when you needed to see a doctor but could not because of cost?\
+    0 = no 1 = yes
+
+15. GenHlth\
+    Would you say that in general your health is:\
+    scale 1-5  
+    1 = excellent  
+    2 = very good  
+    3 = good  
+    4 = fair  
+    5 = poor
+
+16. MentHlth\
+    days of poor mental health\
+    scale 1-30 days
+
+17. PhysHlth\
+    physical illness or injury days in past 30 days\
+    scale 1-30
+
+18. DiffWalk\
+    Do you have serious difficulty walking or climbing stairs?\
+    0 = no 1 = yes
+
+19. Sex\
+    0 = female 1 = male
+
+20. Age\
+    13-level age category (\_AGEG5YR see codebook)\  
+    1 = 18-24  
+    9 = 60-64  
+    13 = 80 or older
+
+21. Education\
+    Education level (EDUCA see codebook)\
+    scale 1-6  
+    1 = Never attended school or only kindergarten 2 = elementary etc.
+
+22. Income\
+    Income scale (INCOME2 see codebook)\
+    scale 1-8m  
+    1 = less than \$10,000  
+    5 = less than \$35,000  
+    8 = \$75,000 or more
+
+The target variable Diabetes_binary has 2 classes. 0 is for no diabetes, and 1 is for prediabetes or diabetes. This dataset has 21 predictor variables and is not balanced."Not balanced" refers to the distribution of the target classes (in this case, Diabetes_binary = 0 or 1). The number of samples in each class is unequal—one class (e.g., no diabetes) has more samples than the other (e.g., prediabetes or diabetes). The plan going in is to look consider all predictor variables.
+
+The objectives of the EDA are:
+
+-   basic validation of the data,
+-   determine rate of missing values.
+-   assign appropriate types to variables,
+-   Investigate distributions ▪ Univariate measures/graphs ▪ Multivariate measures/graphs ◦ Apply transformations and repeat previous step
+
+The goal of the EDA is to inform the modeling process in the selection of model types. The ultimate goal of the modeling process is to develop a model of the response and determine the accuracy of the model.
+
+```{r libraries}
+library(tidyverse)
+library(gt)
+library(janitor)
+
+```
+
+
+
+# Exploratory Data Analysis
+
+```{r Import the Data}
+data_00 <- read.csv("dbhealth_indicators_BRFSS2015.csv")
+str(data_00)
+
+```
+
+The structure of the data reveals that all variables are assumed to be integers.  Here is the conversion plan for the variables:  
+
+Columns 1-4, 6-14, 18 and 19 will be converted to 2-level factors.  
+Columns 15, 21 and 22 will be converted to ordered factors.  
+The remaining columns will be left as integers.
+Some columns will be renamed for readability.
+
+```{r Assign Appropriate Data Types}
+df <- data_00 |> mutate(across(c(1:4,6:14,18,19), as.factor))|>
+  mutate(across(c(15,21,22), as_factor)) |> rename(Diabetes = Diabetes_binary, Heart_Cond = HeartDiseaseorAttack, Phys_Act = PhysActivity, Alcohol = HvyAlcoholConsump, Health_Ins = AnyHealthcare, Cost = NoDocbcCost, Gen_Hlth = GenHlth, Mental_Hlth = MentHlth, Phys_Hlth = PhysHlth, Diff_Walk = DiffWalk) 
+
+psych::describe(df)
+colSums(is.na(df))
+str(df)
+```
+After review of the dataset data_01, in which many variables have been converted to factors, there are no missing values and the mins and maxes seem to be reasonable.  The data was advertised as clean so this is what we would expect.
+```{r Summary Statistics}
+
+# Categorical Variable Summaries
+#2 Way Contingency Tables of Diabetes vs. Predictor Variables
+two_way_tab <- function(var1 = "Diabetes", var2 = "HighBP"){
+  
+  ctab1 <- df %>%
+          tabyl(!!sym(var1), !!sym(var2))
+
+  ctab2 <- gt(ctab1, rowname_col = var1) %>%
+          tab_spanner(
+            columns = names(ctab1)[-1], # all columns except the first
+            label = var2
+          ) %>%
+          tab_stubhead(
+            label = var1
+          ) %>%
+          tab_header(
+            title = paste("2-Way Contingency Table for", var1, "and", var2)
+          ) %>%
+
+        print(ctab2)
+ }
+
+ for(i in colnames(df[-1])){
+    two_way_tab("Diabetes", i )
+   }
+  
+
+
+
+```
+
