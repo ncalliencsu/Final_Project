@@ -6,7 +6,7 @@ editor: visual
 
 # Introduction
 
-The Behavioral Risk Factor Surveillance System (BRFSS) is a health-related telephone survey that is collected annually by the CDC. Each year, the survey collects responses from over 400,000 Americans on health-related risk behaviors, chronic health conditions, and the use of preventative services. It has been conducted every year since 1984. For this ST-558 project, diabetes \_ binary \_ health \_ indicators \_ BRFSS2015.csv is a clean dataset of 253,680 survey responses to the CDC's BRFSS2015. The variables in the data set are listed and described below:
+The Behavioral Risk Factor Surveillance System (BRFSS) is a health-related telephone survey that is collected annually by the CDC. Each year, the survey collects responses from over 400,000 Americans on health-related risk behaviors, chronic health conditions, and the use of preventative services. It has been conducted every year since 1984. For this ST-558 project, diabetes binary health indicators BRFSS2015.csv is a clean dataset of 253,680 survey responses to the CDC's BRFSS2015. The variables in the data set are listed and described below:
 
 1.  Diabetes_binary\
     0 = no diabetes 1 = prediabetes 2 = diabetes
@@ -108,9 +108,9 @@ The objectives of the EDA are:
 -   basic validation of the data,
 -   determine rate of missing values.
 -   assign appropriate types to variables,
--   Investigate distributions ▪ Univariate measures/graphs ▪ Multivariate measures/graphs ◦ Apply transformations and repeat previous step
+-   Investigate distributions ▪ Univariate measures/graphs ▪ Multivariate measures/graphs 
 
-The goal of the EDA is to inform the modeling process in the selection of model types. The ultimate goal of the modeling process is to develop a model of the response and determine the accuracy of the model.
+The goal of the EDA is to inform the modeling process in the selection of model types. 
 
 ```{r libraries}
 
@@ -220,16 +220,15 @@ print(pbs_cor_matrix)
 
 ```
 
-The 2 -Way Contingency Tables are printed for all variables against Diabetes. The reader can look at the tables and look for differences in percentages in the rows between Diabetes = 0 and Diabetes = 1.  I'm not going to analyze all that, but I put it here for the consideration of the reader who wants to see the numbers on the contingencies.
+The 2 -Way Contingency Tables are printed for all variables against Diabetes. The reader can look at the tables and look for differences in percentages in the rows between Diabetes = 0 and Diabetes = 1. I'm not going to analyze all that, but I put it here for the consideration of the reader who wants to see the numbers on the contingencies.
 
 I did perform correlation studies. Tetrachoric correlation is a measure of the correlation between two binary variables. This type of correlation is often used in surveys and personality tests in which the questions being asked only have two possible response values. The value for a tetrachoric correlation can range from -1 to 1 where:
 
--1 indicates a strong negative correlation between the two variables.
-0 indicates no correlation between the two variables. (Statology.org)
+-1 indicates a strong negative correlation between the two variables. 0 indicates no correlation between the two variables. (Statology.org)
 
 From inspection of the Tetrachoric Correlation Matrix, there appears to be some moderate correlation between Diabetes and the following binary predictor variables:
 
--   HighBP  (50%)
+-   HighBP (50%)
 -   HighChol (38%)
 -   Stroke (29%)
 -   Heart_Cond (38%)
@@ -239,17 +238,14 @@ From inspection of the Tetrachoric Correlation Matrix, there appears to be some 
 
 Point-biserial correlation is used to measure the relationship between a binary variable, x, and a continuous variable, y. Similar to the Pearson correlation coefficient, the point-biserial correlation coefficient takes on a value between -1 and 1 where:
 
--1 indicates a perfectly negative correlation between two variables
-0 indicates no correlation between two variables
-1 indicates a perfectly positive correlation between two variables
-(Statology.org)
+-1 indicates a perfectly negative correlation between two variables 0 indicates no correlation between two variables 1 indicates a perfectly positive correlation between two variables (Statology.org)
 
 From inspection of the Point-biserial correlation matrix, there appears to be some moderate correlation between Diabetes and the following ordinal and continuous predictor variables:
 
 -   BMI(22%)
 -   Gen_Hlth(29%)
 
-For all of my assessments here on correlation, I used 20% as the cutoff, which is still not a strong correlation.  The strongest correlations with Diabetes from this data are High Blood Pressure, High Cholesterol, Heart Condition and Difficulty Walking. Note that all these have correlations with each other at approximately 40% levels. I am not sure if this is enough to collapse all these into one variable?  Question for OH!
+For all of my assessments here on correlation, I used 20% as the cutoff, which is still not a strong correlation. The strongest correlations with Diabetes from this data are High Blood Pressure, High Cholesterol, Heart Condition and Difficulty Walking. Note that all these have correlations with each other at approximately 40% levels. I am not sure if this is enough to collapse them into one variable.
 
 ```{r Graphical Summaries}
     
@@ -258,7 +254,7 @@ hist(df$BMI, xlab="BMI", main="Histogram of BMI")
 hist(as.numeric(df$Gen_Hlth), xlab="Gen_Hlth", main="Histogram of Gen_Hlth")
 hist(as.numeric(df$Mental_Hlth), xlab="Mental_Hlth", main="Histogram of Mental_Hlth")
 hist(as.numeric(df$Phys_Hlth), xlab="Phys_Hlth", main="Histogram of Phys_Hlth")
-hist(as.numeric(df$Age), xlab="Age", main="Histogram of Age")
+hist(as.numeric(df$Age), xlab="Age Group", main="Histogram of Age Group")
 hist(as.numeric(df$Education), xlab="Education", main="Histogram of Education")
 hist(as.numeric(df$Income), xlab="Income", main="Histogram of Income")
 
@@ -281,6 +277,33 @@ ggplot(data = df, aes(x= Diabetes , fill = Sex )) +
   scale_fill_discrete("Sex") +
   labs(title = "Count of Diabetes by Alcohol", x = "Diabetes", y = "Count by Sex")
 
+#Box Plots
+ggplot(df, aes(x = Age , y = Diabetes )) +
+  geom_boxplot() + labs(title = "Boxplot of Diabetes by Age Group", x = "Age Group", y = "Diabetes") +
+  scale_x_continuous(breaks=seq(min(df$Age),max(df$Age),by=1))
+
+ggplot(df, aes(x = BMI , y = Diabetes )) +
+  geom_boxplot() + labs(title = "Boxplot of Diabetes by BMI", x = "BMI", y = "Diabetes")
+
+ggplot(df, aes(x= Age, y= Diabetes)) +
+ geom_boxplot(notch=FALSE, outlier.shape=NA, fill="red", alpha=0.1)+
+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  scale_x_continuous(breaks=seq(min(df$Age),max(df$Age),by=1))  + 
+  
+ facet_wrap(. ~ Education, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 90, vjust=.5, hjust=1)) + 
+  labs(title = "Boxplots of Diabetes by Age Group and Education", x = "Age Group", y = "Diabetes")
+
+
+ggplot(df, aes(x= Age, y= Diabetes)) +
+ geom_boxplot(notch=FALSE, outlier.shape=NA, fill="red", alpha=0.1)+
+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  scale_x_continuous(breaks=seq(min(df$Age),max(df$Age),by=1))  + 
+  
+ facet_wrap(. ~ Income, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 90, vjust=.5, hjust=1)) + 
+  labs(title = "Boxplots of Diabetes by Age Group and Income", x = "Age Group", y = "Diabetes")
+
 #Mosaic Plots
 mosaic(data = df, ~ Education + Diabetes, highlighting = "Diabetes",
        highlighting_fill = c("lightblue", "pink"),
@@ -296,37 +319,14 @@ mosaic(data = df, ~ HighBP + Income + Diabetes, highlighting = "Diabetes",
        highlighting_fill = c("lightblue", "pink"),
        rot_labels=c(0,90,0,0), just_labels=c("left","right"),
        main = "Mosaic Plot of Diabetes, Income and HighBP")
-
-#Box Plots
-ggplot(df, aes(x = Age , y = Diabetes )) +
-  geom_boxplot() + labs(title = "Boxplot of Diabetes by Age", x = "Age", y = "Diabetes")  
-
-# Source - https://stackoverflow.com/q/27050802
-
-ggplot(df, aes(x= Age, y= Diabetes)) +
- geom_boxplot(notch=FALSE, outlier.shape=NA, fill="red", alpha=0.1)+
- theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  scale_x_continuous(breaks=seq(min(df$Age),max(df$Age),by=1))  + 
-  
- facet_wrap(. ~ Education, scales = "free_y") +
-  theme(axis.text.x = element_text(angle = 90, vjust=.5, hjust=1)) + 
-  labs(title = "Boxplots of Diabetes by Age and Education", x = "Age", y = "Diabetes")
-
-
-ggplot(df, aes(x= Age, y= Diabetes)) +
- geom_boxplot(notch=FALSE, outlier.shape=NA, fill="red", alpha=0.1)+
- theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  scale_x_continuous(breaks=seq(min(df$Age),max(df$Age),by=1))  + 
-  
- facet_wrap(. ~ Income, scales = "free_y") +
-  theme(axis.text.x = element_text(angle = 90, vjust=.5, hjust=1)) + 
-  labs(title = "Boxplots of Diabetes by Age and Income", x = "Age", y = "Diabetes")
 ```
-The histograms show something interesting. From inspection of the Income and Education Histograms, it appears as though there is a bias in the sample toward higher education and higher income individuals. I cannot imagine that was a desired effect, but it looks like a defect in the sampling plan. 
+
+The histograms show something interesting. From inspection of the Income and Education Histograms, it appears as though there is a bias in the sample toward higher education and higher income individuals. I cannot imagine that was a desired outcome, but it looks like a defect in the sampling plan.
 
 The Bar Plots show what we expect with HighBP having an effect on Diabetes. We can also see that Sex does not seem to have much of an effect, and it could be argued that Alcohol has a positive effect on the Diabetes out come.
 
-A mosaic plot is a graphical representation of the relationships in a contingency table, showing the proportions of combinations of categorical variables as tiles. It’s useful for visualizing associations between two or more categorical variables. The mosaic plot for Income and Diabetes shows a trend in higher incidence of Diabetes for lower income individuals.  With the sample bias toward higher income individuals, the relationship of Diabetes to Income might be much greater than we see in this survey.
+The Box Plots of Diabetes vs. Age and Income seem to show a different picture than the Mosaic Plots. Here, on the faceted Boxplot of Diabetes vs. Age and Income it is not really discernible if there is a difference. The Box Plot of Diabetes vs. BMI suggests that BMI does not have a strong impact on Diabetes. The Boxplot of Diabetes vs Age suggests that Age does have an effect on Diabetes.
 
-The Box Plots of Diabetes vs. Age and Income seem to show a different picture than the Mosaic Plots. Here, on the faceted Boxplot of Diabetes vs. Age and Income it is not really discernible if there is a difference plots.  I think the Mosiac Plots are the best visual tool for this dataset.
+A mosaic plot is a graphical representation of the relationships in a contingency table, showing the proportions of combinations of categorical variables as tiles. It’s useful for visualizing associations between two or more categorical variables. The mosaic plot for Income and Diabetes shows a trend in higher incidence of Diabetes for lower income individuals. With the sample bias toward higher income individuals, the relationship of Diabetes to Income might be much greater than we see in this survey.
 
+T

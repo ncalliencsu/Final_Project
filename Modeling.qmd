@@ -4,3 +4,269 @@ format: html
 editor: visual
 ---
 
+# Introduction
+
+The Behavioral Risk Factor Surveillance System (BRFSS) is a health-related telephone survey that is collected annually by the CDC. Each year, the survey collects responses from over 400,000 Americans on health-related risk behaviors, chronic health conditions, and the use of preventative services. It has been conducted every year since 1984. For this ST-558 project, diabetes binary health indicators BRFSS2015.csv is a clean dataset of 253,680 survey responses to the CDC's BRFSS2015. The variables in the data set are listed and described below:
+
+1.  Diabetes_binary\
+    0 = no diabetes 1 = prediabetes 2 = diabetes
+
+2.  HighBP\
+    0 = no high BP 1 = high BP
+
+3.  HighChol\
+    0 = no high cholesterol 1 = high cholesterol
+
+4.  CholCheck\
+    0 = no cholesterol check in 5 years\
+    1 = yes cholesterol check in 5 years
+
+5.  BMI Body Mass Index
+
+6.  Smoker\
+    Have you smoked at least 100 cigarettes in your entire life?\
+    \[Note: 5 packs = 100 cigarettes\]\
+    0 = no 1 = yes
+
+7.  Stroke\
+    (Ever told) you had a stroke.\
+    0 = no 1 = yes
+
+8.  HeartDiseaseorAttack\
+    coronary heart disease (CHD) or myocardial infarction (MI)\
+    0 = no 1 = yes
+
+9.  PhysActivity\
+    physical activity in past 30 days - not including job\
+    0 = no 1 = yes
+
+10. Fruits\
+    Consume Fruit 1 or more times per day\
+    0 = no 1 = yes
+
+11. Veggies\
+    Consume Vegetables 1 or more times per day\
+    0 = no 1 = yes
+
+12. HvyAlcoholConsump\
+    (adult men \>=14 drinks per week and adult women\>=7 drinks per week)\
+    0 = no 1 = yes
+
+13. AnyHealthcare\
+    Have any kind of health care coverage, including health insurance, prepaid plans such as HMO, etc.\
+    0 = no 1 = yes
+
+14. NoDocbcCost\
+    Was there a time in the past 12 months when you needed to see a doctor but could not because of cost?\
+    0 = no 1 = yes
+
+15. GenHlth\
+    Would you say that in general your health is:\
+    scale 1-5\
+    1 = excellent\
+    2 = very good\
+    3 = good\
+    4 = fair\
+    5 = poor
+
+16. MentHlth\
+    days of poor mental health\
+    scale 1-30 days
+
+17. PhysHlth\
+    physical illness or injury days in past 30 days\
+    scale 1-30
+
+18. DiffWalk\
+    Do you have serious difficulty walking or climbing stairs?\
+    0 = no 1 = yes
+
+19. Sex\
+    0 = female 1 = male
+
+20. Age\
+    13-level age category (\_AGEG5YR see codebook)  1 = 18-24\
+    9 = 60-64\
+    13 = 80 or older
+
+21. Education\
+    Education level (EDUCA see codebook)\
+    scale 1-6\
+    1 = Never attended school or only kindergarten 2 = elementary etc.
+
+22. Income\
+    Income scale (INCOME2 see codebook)\
+    scale 1-8m\
+    1 = less than \$10,000\
+    5 = less than \$35,000  8 = \$75,000 or more
+
+The target variable Diabetes_binary has 2 classes. 0 is for no diabetes, and 1 is for prediabetes or diabetes. This dataset has 21 predictor variables and is not balanced."Not balanced" refers to the distribution of the target classes (in this case, Diabetes_binary = 0 or 1). The number of samples in each class is unequal—one class (e.g., no diabetes) has more samples than the other (e.g., prediabetes or diabetes).
+
+The objectives of the Modeling effort are:
+
+-   split the data into a training and test set
+-   build a family of classification tree models on the training set using at least 5 predictors and a grid of tuning parameters.
+-   build a family of random forest models using on the training set using at least 5 predictors and a grid of tuning parameters.
+-   select the best model from each family using log-loss and 5 fold Cross-Validation
+
+The ultimate goal of the modeling process is to develop and select a final best model (Random Forest or Classification Tree) for predicting the Diabetes variable by considering the log-loss of the models on the test set. The vehicle for all this work is the tidymodels framework.
+
+# Classification Tree
+
+The term classification and regression tree (CART) analysis is an umbrella term used to refer to either of the the Regression Tree and Classification Tree procedures, first introduced by Breiman et al. (1984). The output of a Classification Tree analysis is the structure that the model uses to make predictions on which group a categorical response belongs to. The Classification Tree is the trained model: it encodes all the decision rules and predicted values. In order to predict a new observation, the splits in the tree (based on the predictor variable values) are followed until a leaf node is reached. The value in that leaf is the model’s prediction.
+
+The Classification Tree is built step by step (recursively):
+
+1.  Start with all data at the root node.
+2.  At each node, evaluate all possible splits for all predictors.
+3.  Choose the split that best reduces prediction error.
+4.  Divide the data into two groups based on the chosen split.
+5.  Repeat the process for each child node.
+6.  Stop when acceptance criteria are met (e.g., maximum depth, or no further improvement).
+
+```{r Import the Data}
+
+library(recipes)
+library(tidyverse)
+library(tidymodels)
+library(tree) 
+library(future)
+
+plan(multisession, workers = 12)  # Use 12 cores for Desktop, 10 for Laptop
+
+data_00 <- read.csv("dbhealth_indicators_BRFSS2015.csv")
+
+df <- data_00 |> mutate(across(c(1:4,6:14,18,19), as.factor))|>
+  mutate(across(c(15,21,22), as_factor)) |> rename(Diabetes = Diabetes_binary, Heart_Cond = HeartDiseaseorAttack, Phys_Act = PhysActivity, Alcohol = HvyAlcoholConsump, Health_Ins = AnyHealthcare, Doctor_Cost = NoDocbcCost, Gen_Hlth = GenHlth, Mental_Hlth = MentHlth, Phys_Hlth = PhysHlth, Diff_Walk = DiffWalk) |> 
+  select(Diabetes, HighBP, Diff_Walk, Gen_Hlth, Phys_Act, Alcohol, BMI, Education, Income)
+
+saveRDS(df, file = "data_out.RDS")
+```
+
+## Split the Data and Create CV Folds
+
+```{r}
+set.seed(222)
+# Put 7/10 of the data into the training set.  df_split is the Test Set. 
+df_split <- initial_split(df, prop = 7/10)
+               
+# Create data frames for the two sets:
+df_train_data <- training(df_split)
+df_test_data  <- testing(df_split)
+
+#On the training set, create a 5 fold CV split
+df_CV_folds <- vfold_cv(df_train_data, 5)
+```
+
+## Create Recipe
+
+```{r}
+recipe1 <- 
+    recipe(Diabetes ~ ., data = df_train_data) |> 
+    step_normalize(all_integer_predictors()) |>
+    step_dummy(all_nominal_predictors())
+```
+
+## Define Classification Tree (CLTREE) Model and Engine
+
+```{r}
+CLTREE_model <- 
+  decision_tree(tree_depth = tune(),
+                min_n = 20,
+                cost_complexity = tune()) |>
+  set_engine("rpart") |>
+  set_mode("classification")
+
+```
+
+## Create Workflow for CLTREE Model
+
+```{r}
+CLTREE_wkf <- workflow() |>
+  add_recipe(recipe1) |>
+  add_model(CLTREE_model)
+```
+
+## Fit the CLTREE Model to CV Folds
+
+```{r}
+CLTREE_grid <- grid_regular(cost_complexity(),
+                          tree_depth(),
+                          levels = c(10, 5))
+
+CLTREE_fits <- CLTREE_wkf |> 
+  tune_grid(resamples = df_CV_folds,
+            metrics = metric_set(mn_log_loss),
+            grid = CLTREE_grid)
+```
+
+Pruning helps prevent overfitting by removing branches that have little impact on prediction accuracy. The cost_complexity parameter balances model complexity and generalization. tree_depth is the maximum number of levels (or layers) allowed in the decision tree.
+
+## Select the Best CLTREE Model with select_best()
+
+```{r}
+CLTREE_best <- select_best(CLTREE_fits, metric = "mn_log_loss")
+```
+
+# Random Forest Model
+
+Random forest is a commonly-used machine learning algorithm that combines the output of multiple decision trees to reach a single result.The random forest algorithm is an extension of the ensemble learning algorithm called bagging. It utilizes both bagging and feature randomness to create an uncorrelated forest of decision trees. Feature randomness, also known as feature bagging or “the random subspace method”, generates a random subset of features, which ensures low correlation among decision trees. This is a key difference between decision trees and random forests. While decision trees consider all the possible feature splits, random forests only select a subset of those features. It builds many decision trees and combines their predictions (majority vote for classification).
+
+## Define Random Forest (RF) Model and Engine
+
+```{r}
+RF_model <- rand_forest(mode = "classification", mtry = tune()) |>
+set_engine("ranger", importance = "impurity") 
+```
+
+## Create Workflow for RF Model
+
+```{r}
+RF_wkf <- workflow() |> 
+  add_recipe(recipe1) |>
+add_model(RF_model)
+
+saveRDS(RF_wkf,file = "RF_wkf_out")
+```
+
+## Fit the RF Model to CV Folds
+
+```{r}
+RF_tuned <- RF_wkf |>
+tune_grid(resamples = df_CV_folds,
+grid = 7, 
+metrics = metric_set(mn_log_loss))
+```
+
+## Select the Best RF Model with select_best()
+
+```{r}
+RF_best <- select_best(RF_tuned, metric = "mn_log_loss")
+```
+
+## Fit the CLTREE model to the Test Set
+
+```{r}
+CLTREE_final <- CLTREE_wkf |>
+  finalize_workflow(CLTREE_best) |>
+  last_fit(df_split)
+```
+
+## Fit the RF model to the Test Set
+
+```{r}
+RF_final <- RF_wkf |>
+  finalize_workflow(RF_best) |>
+  last_fit(df_split)
+```
+
+# Compare Both Models on the Test Set
+
+```{r}
+rbind(CLTREE_final |> compute_metrics(metric_set(mn_log_loss)),
+          RF_final |> compute_metrics(metric_set(mn_log_loss)))
+```
+The Random Forest Model has a mean log loss of 0.329 vs. 0.335 for the Classification Tree. Therefore, the Random Forest Model is the more accurate model. We will save the best RF Model for use in the API.R file.
+```{r}
+saveRDS(RF_best, file = "RF_model_out.RDS")
+```        
