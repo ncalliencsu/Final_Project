@@ -25,7 +25,7 @@ The Behavioral Risk Factor Surveillance System (BRFSS) is a health-related telep
 
 6.  Smoker\
     Have you smoked at least 100 cigarettes in your entire life?\
-    \[Note: 5 packs = 100 cigarettes\]  
+    \[Note: 5 packs = 100 cigarettes\]\
     0 = no 1 = yes
 
 7.  Stroke\
@@ -62,11 +62,11 @@ The Behavioral Risk Factor Surveillance System (BRFSS) is a health-related telep
 
 15. GenHlth\
     Would you say that in general your health is:\
-    scale 1-5  
-    1 = excellent  
-    2 = very good  
-    3 = good  
-    4 = fair  
+    scale 1-5\
+    1 = excellent\
+    2 = very good\
+    3 = good\
+    4 = fair\
     5 = poor
 
 16. MentHlth\
@@ -85,21 +85,20 @@ The Behavioral Risk Factor Surveillance System (BRFSS) is a health-related telep
     0 = female 1 = male
 
 20. Age\
-    13-level age category (\_AGEG5YR see codebook)\  
-    1 = 18-24  
-    9 = 60-64  
+    13-level age category (\_AGEG5YR see codebook)  1 = 18-24\
+    9 = 60-64\
     13 = 80 or older
 
 21. Education\
     Education level (EDUCA see codebook)\
-    scale 1-6  
+    scale 1-6\
     1 = Never attended school or only kindergarten 2 = elementary etc.
 
 22. Income\
     Income scale (INCOME2 see codebook)\
-    scale 1-8m  
-    1 = less than \$10,000  
-    5 = less than \$35,000  
+    scale 1-8m\
+    1 = less than \$10,000\
+    5 = less than \$35,000\
     8 = \$75,000 or more
 
 The target variable Diabetes_binary has 2 classes. 0 is for no diabetes, and 1 is for prediabetes or diabetes. This dataset has 21 predictor variables and is not balanced."Not balanced" refers to the distribution of the target classes (in this case, Diabetes_binary = 0 or 1). The number of samples in each class is unequal—one class (e.g., no diabetes) has more samples than the other (e.g., prediabetes or diabetes). The plan going in is to look consider all predictor variables.
@@ -114,13 +113,14 @@ The objectives of the EDA are:
 The goal of the EDA is to inform the modeling process in the selection of model types. The ultimate goal of the modeling process is to develop a model of the response and determine the accuracy of the model.
 
 ```{r libraries}
-library(tidyverse)
+
 library(gt)
 library(janitor)
+library(psych)
+library(tidyverse)
+library(vcd)
 
 ```
-
-
 
 # Exploratory Data Analysis
 
@@ -130,30 +130,36 @@ str(data_00)
 
 ```
 
-The structure of the data reveals that all variables are assumed to be integers.  Here is the conversion plan for the variables:  
+The structure of the data reveals that all variables are assumed to be integers. Here is the conversion plan for the variables:
 
-Columns 1-4, 6-14, 18 and 19 will be converted to 2-level factors.  
-Columns 15, 21 and 22 will be converted to ordered factors.  
-The remaining columns will be left as integers.
-Some columns will be renamed for readability.
+Columns 1-4, 6-14, 18 and 19 will be converted to 2-level factors.\
+Columns 15, 21 and 22 will be converted to ordered factors.\
+The remaining columns will be left as integers. Some columns will be renamed for readability.
 
 ```{r Assign Appropriate Data Types}
 df <- data_00 |> mutate(across(c(1:4,6:14,18,19), as.factor))|>
-  mutate(across(c(15,21,22), as_factor)) |> rename(Diabetes = Diabetes_binary, Heart_Cond = HeartDiseaseorAttack, Phys_Act = PhysActivity, Alcohol = HvyAlcoholConsump, Health_Ins = AnyHealthcare, Cost = NoDocbcCost, Gen_Hlth = GenHlth, Mental_Hlth = MentHlth, Phys_Hlth = PhysHlth, Diff_Walk = DiffWalk) 
+  mutate(across(c(15,21,22), as_factor)) |> rename(Diabetes = Diabetes_binary, Heart_Cond = HeartDiseaseorAttack, Phys_Act = PhysActivity, Alcohol = HvyAlcoholConsump, Health_Ins = AnyHealthcare, Doctor_Cost = NoDocbcCost, Gen_Hlth = GenHlth, Mental_Hlth = MentHlth, Phys_Hlth = PhysHlth, Diff_Walk = DiffWalk) 
 
 psych::describe(df)
 colSums(is.na(df))
 str(df)
 ```
-After review of the dataset data_01, in which many variables have been converted to factors, there are no missing values and the mins and maxes seem to be reasonable.  The data was advertised as clean so this is what we would expect.
+
+After review of the dataset data_01, in which many variables have been converted to factors, there are no missing values and the mins and maxes seem to be reasonable. The data was advertised as clean so this is what we would expect.
+
 ```{r Summary Statistics}
 
 # Categorical Variable Summaries
 #2 Way Contingency Tables of Diabetes vs. Predictor Variables
+
 two_way_tab <- function(var1 = "Diabetes", var2 = "HighBP"){
   
   ctab1 <- df %>%
-          tabyl(!!sym(var1), !!sym(var2))
+          tabyl(!!sym(var1), !!sym(var2)) %>%
+          adorn_totals("row") %>%
+          adorn_percentages("col") %>%
+          adorn_pct_formatting(digits = 2) %>%
+          adorn_ns()
 
   ctab2 <- gt(ctab1, rowname_col = var1) %>%
           tab_spanner(
@@ -165,17 +171,162 @@ two_way_tab <- function(var1 = "Diabetes", var2 = "HighBP"){
           ) %>%
           tab_header(
             title = paste("2-Way Contingency Table for", var1, "and", var2)
-          ) %>%
+          ) 
 
         print(ctab2)
  }
 
  for(i in colnames(df[-1])){
     two_way_tab("Diabetes", i )
-   }
-  
+ }
 
+# Numeric Summaries
+summary(df)
 
+#Correlation Statistics
+
+#Tetrachoric Correlation Matrix for Binary Variables
+df_binary <- df |> mutate(across(c(1:4,6:14,18,19), as.numeric)) |> select(c(1:4,6:14,18,19)) 
+                          
+tetra_corr <- tetrachoric(df_binary)$rho
+cat("\n")
+print("Tetrachoric Correlation Matrix")
+print(tetra_corr)
+
+#Point-BiSerial Correlation Matrix for Ordinal and Continuous Variables
+# Source - https://stackoverflow.com/a/77630670
+
+#create a function 
+point_biserial_cor <- function(binary_var, continuous_var) {
+  cor.test(as.numeric(binary_var), as.numeric(continuous_var), method = "pearson")$estimate
+}
+
+# Identify binary and continuous variables
+binary_var <- names(df[1])
+continuous_vars <- names(df[c(5, 15:17, 20:22)])
+
+# Do the correlation matrix
+pbs_cor_matrix <- matrix(NA, nrow = length(continuous_vars), ncol = 1, dimnames = list(continuous_vars, binary_var))
+
+# Calculate correlations
+for (var in continuous_vars) {
+  pbs_cor_matrix[var, binary_var] <- point_biserial_cor(df[[binary_var]], df[[var]])
+}
+
+# View the correlation matrix
+cat("\n")
+print("Point Biserial Correlation Matrix")
+print(pbs_cor_matrix)
 
 ```
+
+The 2 -Way Contingency Tables are printed for all variables against Diabetes. The reader can look at the tables and look for differences in percentages in the rows between Diabetes = 0 and Diabetes = 1.  I'm not going to analyze all that, but I put it here for the consideration of the reader who wants to see the numbers on the contingencies.
+
+I did perform correlation studies. Tetrachoric correlation is a measure of the correlation between two binary variables. This type of correlation is often used in surveys and personality tests in which the questions being asked only have two possible response values. The value for a tetrachoric correlation can range from -1 to 1 where:
+
+-1 indicates a strong negative correlation between the two variables.
+0 indicates no correlation between the two variables. (Statology.org)
+
+From inspection of the Tetrachoric Correlation Matrix, there appears to be some moderate correlation between Diabetes and the following binary predictor variables:
+
+-   HighBP  (50%)
+-   HighChol (38%)
+-   Stroke (29%)
+-   Heart_Cond (38%)
+-   Phys_Act (-23%)
+-   Alcohol (-23%)
+-   Diff_Walk (41%)
+
+Point-biserial correlation is used to measure the relationship between a binary variable, x, and a continuous variable, y. Similar to the Pearson correlation coefficient, the point-biserial correlation coefficient takes on a value between -1 and 1 where:
+
+-1 indicates a perfectly negative correlation between two variables
+0 indicates no correlation between two variables
+1 indicates a perfectly positive correlation between two variables
+(Statology.org)
+
+From inspection of the Point-biserial correlation matrix, there appears to be some moderate correlation between Diabetes and the following ordinal and continuous predictor variables:
+
+-   BMI(22%)
+-   Gen_Hlth(29%)
+
+For all of my assessments here on correlation, I used 20% as the cutoff, which is still not a strong correlation.  The strongest correlations with Diabetes from this data are High Blood Pressure, High Cholesterol, Heart Condition and Difficulty Walking. Note that all these have correlations with each other at approximately 40% levels. I am not sure if this is enough to collapse all these into one variable?  Question for OH!
+
+```{r Graphical Summaries}
+    
+#Histograms of Ordinal and Continuous Variables
+hist(df$BMI, xlab="BMI", main="Histogram of BMI")
+hist(as.numeric(df$Gen_Hlth), xlab="Gen_Hlth", main="Histogram of Gen_Hlth")
+hist(as.numeric(df$Mental_Hlth), xlab="Mental_Hlth", main="Histogram of Mental_Hlth")
+hist(as.numeric(df$Phys_Hlth), xlab="Phys_Hlth", main="Histogram of Phys_Hlth")
+hist(as.numeric(df$Age), xlab="Age", main="Histogram of Age")
+hist(as.numeric(df$Education), xlab="Education", main="Histogram of Education")
+hist(as.numeric(df$Income), xlab="Income", main="Histogram of Income")
+
+#Grouped Bar Plots
+ggplot(data = df, aes(x= Diabetes , fill = HighBP)) +
+  geom_bar(position = "dodge") +
+  labs(x = "Diabetes") +
+  scale_fill_discrete("HighBP") +
+  labs(title = "Count of Diabetes by HighBP", x = "Diabetes", y = "Count by HighBP")
+
+ggplot(data = df, aes(x= Diabetes , fill = Alcohol )) +
+  geom_bar(position = "dodge") +
+  labs(x = "Diabetes") +
+  scale_fill_discrete("Alcohol") +
+  labs(title = "Count of Diabetes by Alcohol", x = "Diabetes", y = "Count by Alcohol")
+
+ggplot(data = df, aes(x= Diabetes , fill = Sex )) +
+  geom_bar(position = "dodge") +
+  labs(x = "Diabetes") +
+  scale_fill_discrete("Sex") +
+  labs(title = "Count of Diabetes by Alcohol", x = "Diabetes", y = "Count by Sex")
+
+#Mosaic Plots
+mosaic(data = df, ~ Education + Diabetes, highlighting = "Diabetes",
+       highlighting_fill = c("lightblue", "pink"),
+       rot_labels=c(0,90,0,0), just_labels=c("left","right"),
+       main = "Mosaic Plot of Diabetes and Education")
+
+mosaic(data = df, ~ Income + Diabetes, highlighting = "Diabetes",
+       highlighting_fill = c("lightblue", "pink"),
+       rot_labels=c(0,90,0,0), just_labels=c("left","right"),
+       main = "Mosaic Plot of Diabetes and Income")
+
+mosaic(data = df, ~ HighBP + Income + Diabetes, highlighting = "Diabetes",
+       highlighting_fill = c("lightblue", "pink"),
+       rot_labels=c(0,90,0,0), just_labels=c("left","right"),
+       main = "Mosaic Plot of Diabetes, Income and HighBP")
+
+#Box Plots
+ggplot(df, aes(x = Age , y = Diabetes )) +
+  geom_boxplot() + labs(title = "Boxplot of Diabetes by Age", x = "Age", y = "Diabetes")  
+
+# Source - https://stackoverflow.com/q/27050802
+
+ggplot(df, aes(x= Age, y= Diabetes)) +
+ geom_boxplot(notch=FALSE, outlier.shape=NA, fill="red", alpha=0.1)+
+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  scale_x_continuous(breaks=seq(min(df$Age),max(df$Age),by=1))  + 
+  
+ facet_wrap(. ~ Education, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 90, vjust=.5, hjust=1)) + 
+  labs(title = "Boxplots of Diabetes by Age and Education", x = "Age", y = "Diabetes")
+
+
+ggplot(df, aes(x= Age, y= Diabetes)) +
+ geom_boxplot(notch=FALSE, outlier.shape=NA, fill="red", alpha=0.1)+
+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  scale_x_continuous(breaks=seq(min(df$Age),max(df$Age),by=1))  + 
+  
+ facet_wrap(. ~ Income, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 90, vjust=.5, hjust=1)) + 
+  labs(title = "Boxplots of Diabetes by Age and Income", x = "Age", y = "Diabetes")
+```
+The histograms show something interesting. From inspection of the Income and Education Histograms, it appears as though there is a bias in the sample toward higher education and higher income individuals. I cannot imagine that was a desired effect, but it looks like a defect in the sampling plan. 
+
+The Bar Plots show what we expect with HighBP having an effect on Diabetes. We can also see that Sex does not seem to have much of an effect, and it could be argued that Alcohol has a positive effect on the Diabetes out come.
+
+A mosaic plot is a graphical representation of the relationships in a contingency table, showing the proportions of combinations of categorical variables as tiles. It’s useful for visualizing associations between two or more categorical variables. The mosaic plot for Income and Diabetes shows a trend in higher incidence of Diabetes for lower income individuals.  With the sample bias toward higher income individuals, the relationship of Diabetes to Income might be much greater than we see in this survey.
+
+The Box Plots of Diabetes vs. Age and Income seem to show a different picture than the Mosaic Plots. Here, on the faceted Boxplot of Diabetes vs. Age and Income it is not really discernible if there is a difference plots.  I think the Mosiac Plots are the best visual tool for this dataset.
 
