@@ -108,9 +108,9 @@ The objectives of the EDA are:
 -   basic validation of the data,
 -   determine rate of missing values.
 -   assign appropriate types to variables,
--   Investigate distributions ▪ Univariate measures/graphs ▪ Multivariate measures/graphs 
+-   Investigate distributions ▪ Univariate measures/graphs ▪ Multivariate measures/graphs
 
-The goal of the EDA is to inform the modeling process in the selection of model types. 
+The goal of the EDA is to inform the modeling process in the selection of model types.
 
 ```{r libraries}
 

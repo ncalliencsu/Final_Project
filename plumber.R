@@ -1,12 +1,29 @@
-#A REST API (Representational State Transfer Application Programming Interface) is a set of rules #for building web services that allow systems to communicate over HTTP. REST APIs use standard HTTP methods like GET, POST, PUT, and DELETE to perform operations on resources, which are typically #represented as URLs. 
-
-#REST emphasizes stateless communication, meaning each request contains all the information needed for the server to process it, and responses are usually formatted in JSON or XML. REST APIs are widely used for web and mobile applications due to their simplicity, scalability, and #compatibility with web standards.
-
 # This is a Plumber API. You can run the API by clicking the 'Run API' button above.
 #
 # Find out more about building APIs with Plumber here:
 #
 #    https://www.rplumber.io/
+
+# Endpoints define the R code that is executed in response to incoming requests.
+# These endpoints correspond to HTTP methods and respond to incoming requests 
+# that match the defined method.
+
+#METHODS
+
+#• @get - request a resource
+#• @post - send data in body
+#• @put - store / update data
+#• @delete - delete resource
+#• @head - no request body
+#• @options - describe options
+#• @patch - partial changes
+#• @use - use all methods
+
+library(plumber)
+library(tidymodels)
+
+#* @apiTitle Diabetes Prediction API
+#* @apiDescription API for exploring Diabetes Dataset 
 
 #Read in Data and Model Objects from Modeling File
 data_in <- readRDS(file = "data_out.RDS")
@@ -18,38 +35,49 @@ final_model <- RF_wkf_in |>
   finalize_workflow(RF_model_in) |>
   fit(data_in)
 
-library(plumber)
 
-#* @apiTitle Final_Project
-#* @apiDescription Predictive Model of Diabetes Data
 
-#* Echo back the input
+#* Information Endpoint
 #* @param msg The message to echo
-#* @get /echo
+#* @get /info
+
 function(msg = "") {
     list(msg = paste0("The message is: '", msg, "'"))
 }
 
-#* Plot a histogram
+#* Prediction Endpoint
+#* @param HBP high blood pressure 
+#* @param DWALK difficulty walking 
+#* @param GHLTH general health
+#* @param PHYS physically active
+#* @param ALCH heavy alcohol
+#* @param BMI body mass index
+#* @param EDU education level
+#* @param INC income level
+#* @get /pred
+
+function(HBP = 0, DWALK = 0, GHLTH = 2, 
+         PHYS = 3.185, ALCH = 0, BMI = 28.38,
+         EDU = 6, INC = 8) {
+  
+  newdata <- c(HBP, DWALK, GHLTH, PHYS,
+               ALCH, BMI, EDU, INC)
+  
+  predict(final_model, newdata, type = "response")
+    
+}
+
+
+#* Plot a Confusion Matrix
 #* @serializer png
-#* @get /plot
+#* @get /confusion
+
 function() {
-    rand <- rnorm(100)
-    hist(rand)
+  
+  conf_mat()
+  
+ 
+  
 }
 
-#* Return the sum of two numbers
-#* @param a The first number to add
-#* @param b The second number to add
-#* @post /sum
-function(a, b) {
-    as.numeric(a) + as.numeric(b)
-}
 
-# Programmatically alter your API
-#* @plumber
-function(pr) {
-    pr %>%
-        # Overwrite the default serializer to return unboxed JSON
-        pr_set_serializer(serializer_unboxed_json())
-}
