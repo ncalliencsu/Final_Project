@@ -48,41 +48,65 @@ function(msg = "Metadata for Final Project") {
 
 
 #* Prediction Endpoint
-#* @param HighBP high blood pressure 
+#* @param High_BP high blood pressure 
 #* @param Diff_Walk difficulty walking 
-#* @param Gen_Hlth general health
+#* @param High_Chol high cholesterol
+#* @param Heart_Cond heart condition
+#* @param Stroke history of stroke
 #* @param Phys_Act physically active
 #* @param Alcohol heavy alcohol
 #* @param BMI body mass index
-#* @param Education education level
-#* @param Income income level
+#* @param Gen_Hlth general health
+#* @param Age_Group age category
 #* @get /pred
 
- f <- function(HighBP = 0, Diff_Walk = 0, Gen_Hlth = 2, 
-         Phys_Act = 1, Alcohol = 0, BMI = 28.38,
-         Education = 6, Income = 8) {
+ f <- function(High_BP = 0,Diff_Walk = 0, High_Chol = 0,
+               Heart_Cond = 0, Stroke = 0, Phys_Act = 1, 
+               Alcohol = 0, BMI = 28.38, Gen_Hlth = 2, Age_Group = 8) {
   
-  HighBP <- as.factor(HighBP)
-  Diff_Walk <- as.factor(Diff_Walk)
-  Gen_Hlth <- as.factor(Gen_Hlth)
-  Phys_Act <- as.factor(Phys_Act)
-  Alcohol <- as.factor(Alcohol)
-  BMI <- as.integer(BMI)
-  Education <- as.factor(Education)
-  Income <- as.factor(Income)
+ High_BP <- factor(High_BP)
+ Diff_Walk <- factor(Diff_Walk)
+ High_Chol <- factor(High_Chol)
+ Heart_Cond <- factor(Heart_Cond)
+ Stroke <- factor(Stroke)
+ Phys_Act <- factor(Phys_Act)
+ Alcohol <- factor(Alcohol)
+ BMI <- as.integer(BMI)
+ Gen_Hlth <- factor(Gen_Hlth)
+ Age_Group <- factor(Age_Group)
   
   
-  newdata <- data.frame(HighBP, Diff_Walk, Gen_Hlth, Phys_Act,
-               Alcohol, BMI, Education, Income) 
+  newdata <- data.frame(
+    High_BP, 
+    Diff_Walk, 
+    High_Chol,
+    Heart_Cond,
+    Stroke,
+    Phys_Act,
+    Alcohol,
+    BMI, 
+    Gen_Hlth,
+    Age_Group)
   
   p <- predict(final_model, new_data = newdata)
 
     if(p == 0){
     print("Prediction: No Diabetes")
   } else print("Prediction: Diabetes")
-    
+  
+
 }
 
+ # Example Function Calls for Prediction Endpoint
+
+  #http://localhost:8000/pred?High_BP=1&Diff_Walk=0&High_Chol=1&Heart_Cond=1&Stroke=1&Phys_Act=0&Alcohol=1&BMI=20&Gen_Hlth=3&Age_Group=7
+ 
+ #http://localhost:8000/pred?High_BP=0&Diff_Walk=1&High_Chol=1&Heart_Cond=0&Stroke=0&Phys_Act=1&Alcohol=0&BMI=75&Gen_Hlth=1&Age_Group=9
+ 
+ #http://localhost:8000/pred?Heart_Cond=0&Stroke=0&Phys_Act=1&Alcohol=0&BMI=75&Gen_Hlth=1&Age_Group=4
+ 
+ 
+ 
 #* Confusion Matrix Endpoint
 #* @serializer png
 #* @get /confusion
@@ -93,7 +117,7 @@ function(msg = "Metadata for Final Project") {
            Diabetes, #truth
            estimate)
   
-  autoplot(cm, type = "heatmap")
+  print(autoplot(cm, type = "heatmap"))
 }
 
 

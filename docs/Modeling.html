@@ -294,13 +294,13 @@ Attaching package: 'recipes'</code></pre>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tree) </span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(future)</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plan</span>(multisession, <span class="at">workers =</span> <span class="dv">12</span>)  <span class="co"># Use 12 cores for Desktop, 10 for Laptop</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plan</span>(multisession, <span class="at">workers =</span> <span class="dv">10</span>)  <span class="co"># Use 10 cores</span></span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>data_00 <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"dbhealth_indicators_BRFSS2015.csv"</span>)</span>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> data_00 <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,<span class="dv">6</span><span class="sc">:</span><span class="dv">14</span>,<span class="dv">18</span>,<span class="dv">19</span>), as.factor))<span class="sc">|&gt;</span></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="dv">15</span>,<span class="dv">21</span>,<span class="dv">22</span>), as_factor)) <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">Diabetes =</span> Diabetes_binary, <span class="at">Heart_Cond =</span> HeartDiseaseorAttack, <span class="at">Phys_Act =</span> PhysActivity, <span class="at">Alcohol =</span> HvyAlcoholConsump, <span class="at">Health_Ins =</span> AnyHealthcare, <span class="at">Doctor_Cost =</span> NoDocbcCost, <span class="at">Gen_Hlth =</span> GenHlth, <span class="at">Mental_Hlth =</span> MentHlth, <span class="at">Phys_Hlth =</span> PhysHlth, <span class="at">Diff_Walk =</span> DiffWalk) <span class="sc">|&gt;</span> </span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Diabetes, HighBP, Diff_Walk, Gen_Hlth, Phys_Act, Alcohol, BMI, Education, Income)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="dv">15</span>,<span class="dv">20</span>,<span class="dv">21</span>,<span class="dv">22</span>), as_factor)) <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">Diabetes =</span> Diabetes_binary, <span class="at">Heart_Cond =</span> HeartDiseaseorAttack, <span class="at">Age_Group =</span> Age, <span class="at">Phys_Act =</span> PhysActivity, <span class="at">Alcohol =</span> HvyAlcoholConsump, <span class="at">Health_Ins =</span> AnyHealthcare, <span class="at">Doctor_Cost =</span> NoDocbcCost, <span class="at">Gen_Hlth =</span> GenHlth, <span class="at">Mental_Hlth =</span> MentHlth, <span class="at">Phys_Hlth =</span> PhysHlth, <span class="at">Diff_Walk =</span> DiffWalk, <span class="at">High_BP =</span> HighBP, <span class="at">High_Chol =</span> HighChol, <span class="at">Chol_Check =</span> CholCheck) <span class="sc">|&gt;</span> </span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Diabetes, High_BP, Diff_Walk, High_Chol, Heart_Cond, Stroke, Phys_Act, Alcohol, BMI, Gen_Hlth, Age_Group)</span>
 <span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(df, <span class="at">file =</span> <span class="st">"data_out.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -333,7 +333,7 @@ Attaching package: 'recipes'</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>CLTREE_model <span class="ot">&lt;-</span> </span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">decision_tree</span>(<span class="at">tree_depth =</span> <span class="fu">tune</span>(),</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">min_n =</span> <span class="dv">20</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">min_n =</span> <span class="dv">10</span>,</span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">cost_complexity =</span> <span class="fu">tune</span>()) <span class="sc">|&gt;</span></span>
 <span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"rpart"</span>) <span class="sc">|&gt;</span></span>
 <span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"classification"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -352,7 +352,7 @@ Attaching package: 'recipes'</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>CLTREE_grid <span class="ot">&lt;-</span> <span class="fu">grid_regular</span>(<span class="fu">cost_complexity</span>(),</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>                          <span class="fu">tree_depth</span>(),</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">5</span>))</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">3</span>))</span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>CLTREE_fits <span class="ot">&lt;-</span> CLTREE_wkf <span class="sc">|&gt;</span> </span>
 <span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tune_grid</span>(<span class="at">resamples =</span> df_CV_folds,</span>
@@ -432,11 +432,11 @@ Attaching package: 'recipes'</code></pre>
 <pre><code># A tibble: 2 × 4
   .metric     .estimator .estimate .config             
   &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;               
-1 mn_log_loss binary         0.336 Preprocessor1_Model1
-2 mn_log_loss binary         0.330 Preprocessor1_Model1</code></pre>
+1 mn_log_loss binary         0.337 Preprocessor1_Model1
+2 mn_log_loss binary         0.317 Preprocessor1_Model1</code></pre>
 </div>
 </div>
-<p>The Random Forest Model has a mean log loss of 0.329 vs.&nbsp;0.335 for the Classification Tree. Therefore, the Random Forest Model is the more accurate model. We will save the best RF Model for use in the API.R file.</p>
+<p>The Random Forest Model has a mean log loss of 0.317 vs.&nbsp;0.337 for the Classification Tree. Therefore, the Random Forest Model is the more accurate model. We will save the best RF Model for use in the API.R file.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(RF_best, <span class="at">file =</span> <span class="st">"RF_model_out.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>

@@ -138,7 +138,7 @@ The remaining columns will be left as integers. Some columns will be renamed for
 
 ```{r Assign Appropriate Data Types}
 df <- data_00 |> mutate(across(c(1:4,6:14,18,19), as.factor))|>
-  mutate(across(c(15,21,22), as_factor)) |> rename(Diabetes = Diabetes_binary, Heart_Cond = HeartDiseaseorAttack, Phys_Act = PhysActivity, Alcohol = HvyAlcoholConsump, Health_Ins = AnyHealthcare, Doctor_Cost = NoDocbcCost, Gen_Hlth = GenHlth, Mental_Hlth = MentHlth, Phys_Hlth = PhysHlth, Diff_Walk = DiffWalk) 
+  mutate(across(c(15,20,21,22), as_factor)) |> rename(Diabetes = Diabetes_binary, Heart_Cond = HeartDiseaseorAttack, Phys_Act = PhysActivity, Alcohol = HvyAlcoholConsump, Health_Ins = AnyHealthcare, Doctor_Cost = NoDocbcCost, Gen_Hlth = GenHlth, Mental_Hlth = MentHlth, Phys_Hlth = PhysHlth, Diff_Walk = DiffWalk, High_BP = HighBP, High_Chol = HighChol, Age_Group = Age, Chol_Check = CholCheck) 
 
 psych::describe(df)
 colSums(is.na(df))
@@ -230,13 +230,14 @@ I did perform correlation studies. Tetrachoric correlation is a measure of the c
 
 From inspection of the Tetrachoric Correlation Matrix, there appears to be some moderate correlation between Diabetes and the following binary predictor variables:
 
--   HighBP (50%)
--   HighChol (38%)
--   Stroke (29%)
+-   High_BP (50%)
+-   Diff_Walk (41%)
+-   High_Chol (38%)
 -   Heart_Cond (38%)
+-   Stroke (29%)
 -   Phys_Act (-23%)
 -   Alcohol (-23%)
--   Diff_Walk (41%)
+
 
 Point-biserial correlation is used to measure the relationship between a binary variable, x, and a continuous variable, y. Similar to the Pearson correlation coefficient, the point-biserial correlation coefficient takes on a value between -1 and 1 where:
 
@@ -257,16 +258,16 @@ hist(df$BMI, xlab="BMI", main="Histogram of BMI")
 hist(as.numeric(df$Gen_Hlth), xlab="Gen_Hlth", main="Histogram of Gen_Hlth")
 hist(as.numeric(df$Mental_Hlth), xlab="Mental_Hlth", main="Histogram of Mental_Hlth")
 hist(as.numeric(df$Phys_Hlth), xlab="Phys_Hlth", main="Histogram of Phys_Hlth")
-hist(as.numeric(df$Age), xlab="Age Group", main="Histogram of Age Group")
+hist(as.numeric(df$Age_Group), xlab="Age Group", main="Histogram of Age Group")
 hist(as.numeric(df$Education), xlab="Education", main="Histogram of Education")
 hist(as.numeric(df$Income), xlab="Income", main="Histogram of Income")
 
 #Grouped Bar Plots
-ggplot(data = df, aes(x= Diabetes , fill = HighBP)) +
+ggplot(data = df, aes(x= Diabetes , fill = High_BP)) +
   geom_bar(position = "dodge") +
   labs(x = "Diabetes") +
-  scale_fill_discrete("HighBP") +
-  labs(title = "Count of Diabetes by HighBP", x = "Diabetes", y = "Count by HighBP")
+  scale_fill_discrete("High_BP") +
+  labs(title = "Count of Diabetes by High_BP", x = "Diabetes", y = "Count by HighBP")
 
 ggplot(data = df, aes(x= Diabetes , fill = Alcohol )) +
   geom_bar(position = "dodge") +
@@ -281,27 +282,27 @@ ggplot(data = df, aes(x= Diabetes , fill = Sex )) +
   labs(title = "Count of Diabetes by Sex", x = "Diabetes", y = "Count by Sex")
 
 #Box Plots
-ggplot(df, aes(x = Age , y = Diabetes )) +
+ggplot(df, aes(x = Age_Group , y = Diabetes )) +
   geom_boxplot() + labs(title = "Boxplot of Diabetes by Age Group", x = "Age Group", y = "Diabetes") +
-  scale_x_continuous(breaks=seq(min(df$Age),max(df$Age),by=1))
+  scale_x_discrete(breaks=seq(min(as.numeric(df$Age_Group)),max(as.numeric(df$Age_Group)),by=1))
 
 ggplot(df, aes(x = BMI , y = Diabetes )) +
   geom_boxplot() + labs(title = "Boxplot of Diabetes by BMI", x = "BMI", y = "Diabetes")
 
-ggplot(df, aes(x= Age, y= Diabetes)) +
+ggplot(df, aes(x= Age_Group, y= Diabetes)) +
  geom_boxplot(notch=FALSE, outlier.shape=NA, fill="red", alpha=0.1)+
  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  scale_x_continuous(breaks=seq(min(df$Age),max(df$Age),by=1))  + 
+  scale_x_discrete(breaks=seq(min(as.numeric(df$Age_Group)),max(as.numeric(df$Age_Group)),by=1))  + 
   
  facet_wrap(. ~ Education, scales = "free_y") +
   theme(axis.text.x = element_text(angle = 90, vjust=.5, hjust=1)) + 
   labs(title = "Boxplots of Diabetes by Age Group and Education", x = "Age Group", y = "Diabetes")
 
 
-ggplot(df, aes(x= Age, y= Diabetes)) +
+ggplot(df, aes(x= Age_Group, y= Diabetes)) +
  geom_boxplot(notch=FALSE, outlier.shape=NA, fill="red", alpha=0.1)+
  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  scale_x_continuous(breaks=seq(min(df$Age),max(df$Age),by=1))  + 
+  scale_x_discrete(breaks=seq(min(as.numeric(df$Age_Group)),max(as.numeric(df$Age_Group)),by=1))  + 
   
  facet_wrap(. ~ Income, scales = "free_y") +
   theme(axis.text.x = element_text(angle = 90, vjust=.5, hjust=1)) + 
@@ -318,17 +319,22 @@ mosaic(data = df, ~ Income + Diabetes, highlighting = "Diabetes",
        rot_labels=c(0,90,0,0), just_labels=c("left","right"),
        main = "Mosaic Plot of Diabetes and Income")
 
-mosaic(data = df, ~ HighBP + Income + Diabetes, highlighting = "Diabetes",
+mosaic(data = df, ~ High_BP + Diabetes, highlighting = "Diabetes",
        highlighting_fill = c("lightblue", "pink"),
        rot_labels=c(0,90,0,0), just_labels=c("left","right"),
-       main = "Mosaic Plot of Diabetes, Income and HighBP")
+       main = "Mosaic Plot of Diabetes and High_BP")
+
+mosaic(data = df, ~ Age_Group + Diabetes, highlighting = "Diabetes",
+       highlighting_fill = c("lightblue", "pink"),
+       rot_labels=c(0,90,0,0), just_labels=c("left","right"),
+       main = "Mosaic Plot of Diabetes and Age Group")
 ```
 
 The histograms show something interesting. From inspection of the Income and Education Histograms, it appears as though there is a bias in the sample toward higher education and higher income individuals. I cannot imagine that was a desired outcome, but it looks like a defect in the sampling plan.
 
 The Bar Plots show what we expect with HighBP having an effect on Diabetes. We can also see that Sex does not seem to have much of an effect, and it could be argued that Alcohol has a positive effect on the Diabetes out come.
 
-The Box Plots of Diabetes vs. Age and Income seem to show a different picture than the Mosaic Plots. Here, on the faceted Boxplot of Diabetes vs. Age and Income it is not really discernible if there is a difference. The Box Plot of Diabetes vs. BMI suggests that BMI does not have a strong impact on Diabetes. The Boxplot of Diabetes vs Age suggests that Age does have an effect on Diabetes.
+The Box Plots of Diabetes vs. Age and Income seem to show a different picture than the Mosaic Plots. Here, on the faceted Boxplot of Diabetes vs. Age and Income it is not really discernible if there is a difference. The Box Plot of Diabetes vs. BMI suggests that BMI does not have a strong impact on Diabetes. The Boxplot of Diabetes vs Age suggests that Age does have an effect on Diabetes and this agrees with the Mosaic Plot.
 
 A mosaic plot is a graphical representation of the relationships in a contingency table, showing the proportions of combinations of categorical variables as tiles. It’s useful for visualizing associations between two or more categorical variables. The mosaic plot for Income and Diabetes shows a trend in higher incidence of Diabetes for lower income individuals. With the sample bias toward higher income individuals, the relationship of Diabetes to Income might be much greater than we see in this survey.
 
