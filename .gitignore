@@ -7,7 +7,7 @@
 .RDataTmp
 
 # User-specific files
-.Ruserdata  
+.Ruserdata
 
 # Example code in package build process
 *-Ex.R
@@ -40,10 +40,12 @@ vignettes/*.pdf
 .Renviron
 
 # pkgdown site
-docs/
+#docs/
 
 # translation temp files
 po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+/.quarto/

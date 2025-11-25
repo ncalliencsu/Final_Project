@@ -147,9 +147,7 @@ str(df)
 
 After review of the dataset data_01, in which many variables have been converted to factors, there are no missing values and the mins and maxes seem to be reasonable. The data was advertised as clean so this is what we would expect.
 
-```{r Summary Statistics}
-
-# Categorical Variable Summaries
+```{r Categorical Variable Summaries, eval=FALSE}
 #2 Way Contingency Tables of Diabetes vs. Predictor Variables
 
 two_way_tab <- function(var1 = "Diabetes", var2 = "HighBP"){
@@ -179,6 +177,10 @@ two_way_tab <- function(var1 = "Diabetes", var2 = "HighBP"){
  for(i in colnames(df[-1])){
     two_way_tab("Diabetes", i )
  }
+```
+
+## Summary Statistics
+```{r Summary Statistics}
 
 # Numeric Summaries
 summary(df)
@@ -220,7 +222,7 @@ print(pbs_cor_matrix)
 
 ```
 
-The 2 -Way Contingency Tables are printed for all variables against Diabetes. The reader can look at the tables and look for differences in percentages in the rows between Diabetes = 0 and Diabetes = 1. I'm not going to analyze all that, but I put it here for the consideration of the reader who wants to see the numbers on the contingencies.
+I developed code that generated 2 -Way Contingency Tables for all the variables against Diabetes, but they would not render to HTML.  So, I left the code in the document but set eval = FALSE. If you run the code chunk for Categorical Variables Summaries you can have a look at the Tables and look for differences in percentages in the rows between Diabetes = 0 and Diabetes = 1.
 
 I did perform correlation studies. Tetrachoric correlation is a measure of the correlation between two binary variables. This type of correlation is often used in surveys and personality tests in which the questions being asked only have two possible response values. The value for a tetrachoric correlation can range from -1 to 1 where:
 
@@ -247,6 +249,7 @@ From inspection of the Point-biserial correlation matrix, there appears to be so
 
 For all of my assessments here on correlation, I used 20% as the cutoff, which is still not a strong correlation. The strongest correlations with Diabetes from this data are High Blood Pressure, High Cholesterol, Heart Condition and Difficulty Walking. Note that all these have correlations with each other at approximately 40% levels. I am not sure if this is enough to collapse them into one variable.
 
+## Graphical Summaries
 ```{r Graphical Summaries}
     
 #Histograms of Ordinal and Continuous Variables
@@ -275,7 +278,7 @@ ggplot(data = df, aes(x= Diabetes , fill = Sex )) +
   geom_bar(position = "dodge") +
   labs(x = "Diabetes") +
   scale_fill_discrete("Sex") +
-  labs(title = "Count of Diabetes by Alcohol", x = "Diabetes", y = "Count by Sex")
+  labs(title = "Count of Diabetes by Sex", x = "Diabetes", y = "Count by Sex")
 
 #Box Plots
 ggplot(df, aes(x = Age , y = Diabetes )) +
@@ -329,4 +332,8 @@ The Box Plots of Diabetes vs. Age and Income seem to show a different picture th
 
 A mosaic plot is a graphical representation of the relationships in a contingency table, showing the proportions of combinations of categorical variables as tiles. It’s useful for visualizing associations between two or more categorical variables. The mosaic plot for Income and Diabetes shows a trend in higher incidence of Diabetes for lower income individuals. With the sample bias toward higher income individuals, the relationship of Diabetes to Income might be much greater than we see in this survey.
 
-T
+## Link to Modeling Page
+
+[Click Here for Modeling Page](https://www.example.com)
+
+
