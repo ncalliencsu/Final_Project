@@ -226,7 +226,7 @@ RF_wkf <- workflow() |>
   add_recipe(recipe1) |>
 add_model(RF_model)
 
-saveRDS(RF_wkf,file = "RF_wkf_out")
+saveRDS(RF_wkf,file = "RF_wkf_out.RDS")
 ```
 
 ## Fit the RF Model to CV Folds
@@ -266,7 +266,9 @@ RF_final <- RF_wkf |>
 rbind(CLTREE_final |> compute_metrics(metric_set(mn_log_loss)),
           RF_final |> compute_metrics(metric_set(mn_log_loss)))
 ```
+
 The Random Forest Model has a mean log loss of 0.329 vs. 0.335 for the Classification Tree. Therefore, the Random Forest Model is the more accurate model. We will save the best RF Model for use in the API.R file.
+
 ```{r}
 saveRDS(RF_best, file = "RF_model_out.RDS")
-```        
+```
