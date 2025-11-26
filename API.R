@@ -96,8 +96,8 @@ f <- function(High_BP = 0, Diff_Walk = 0, High_Chol = 0,
    p <- predict(final_model, new_data = newdata)
 
     if(p == 0){
-    print("Prediction: Diabetes")
-  } else print("Prediction: No Diabetes")
+    print("Prediction: No Diabetes")
+  } else print("Prediction: Diabetes")
   
 
 }
