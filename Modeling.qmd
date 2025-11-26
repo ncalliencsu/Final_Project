@@ -217,7 +217,7 @@ Random forest is a commonly-used machine learning algorithm that combines the ou
 ## Define Random Forest (RF) Model and Engine
 
 ```{r Random Forest Model}
-RF_model <- rand_forest(mode = "classification", mtry = tune()) |>
+RF_model <- rand_forest(mode = "classification", mtry = tune(), trees = 100) |>
 set_engine("ranger", importance = "impurity") 
 ```
 
@@ -227,8 +227,6 @@ set_engine("ranger", importance = "impurity")
 RF_wkf <- workflow() |> 
   add_recipe(recipe1) |>
 add_model(RF_model)
-
-saveRDS(RF_wkf,file = "RF_wkf_out.RDS")
 ```
 
 ## Fit the RF Model to CV Folds
@@ -277,8 +275,13 @@ RF_final |>
   extract_fit_parsnip() |>
   vip(num_features = 10)
 ```
+```{r Final Model Entire Data Set}
+final_model <- RF_wkf |>
+  finalize_workflow(RF_best) |>
+  fit(df)
+```
 
 
-```{r Save Best Model}
-saveRDS(RF_best, file = "RF_model_out.RDS")
+```{r Save Final Model}
+saveRDS(final_model, file = "final_model.RDS")
 ```

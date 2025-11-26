@@ -6,15 +6,14 @@ RUN apt-get update -qq && apt-get install -y  libssl-dev  libcurl4-gnutls-dev  l
     
     
 # install plumber, tidymodels
-RUN R -e "install.packages(c('tidymodels', 'plumber', 'ranger'))"
+RUN R -e "install.packages(c('tidymodels', 'plumber', 'ranger', 'validate'))"
 
 # copy API.R from the current directory into the container
 COPY API.R API.R
 
 #copy dataset, workflow and model from the current directory into the container
 COPY data_out.RDS data_out.RDS
-COPY RF_wkf_out.RDS RF_wkf_out.RDS
-COPY RF_model_out.RDS RF_model_out.RDS
+COPY final_model.RDS final_model.RDS
 
 # open port to traffic
 EXPOSE 8000

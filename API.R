@@ -21,20 +21,15 @@
 
 library(plumber)
 library(tidymodels)
+library(validate)
 
 #* @apiTitle Diabetes Prediction API
 #* @apiDescription API for exploring Diabetes Dataset 
 
 #Read in Data and Model Objects from Modeling File
 data_in <- readRDS(file = "data_out.RDS")
-RF_wkf_in <- readRDS(file = "RF_wkf_out.RDS")
-RF_model_in <- readRDS(file = "RF_model_out.RDS")
+final_model <- readRDS(file = "final_model.RDS")
 
-
-#Fit Best Model to Entire Dataset
-final_model <- RF_wkf_in |>
-  finalize_workflow(RF_model_in) |>
-  fit(data_in) 
 
 #* Information Endpoint
 #* @param msg The message to echo
@@ -60,39 +55,49 @@ function(msg = "Metadata for Final Project") {
 #* @param Age_Group age category
 #* @get /pred
 
- f <- function(High_BP = 0,Diff_Walk = 0, High_Chol = 0,
-               Heart_Cond = 0, Stroke = 0, Phys_Act = 1, 
-               Alcohol = 0, BMI = 28.38, Gen_Hlth = 2, Age_Group = 8) {
+f <- function(High_BP = 0, Diff_Walk = 0, High_Chol = 0,
+              Heart_Cond = 0, Stroke = 0, Phys_Act = 1, 
+              Alcohol = 0, BMI = 28.38, Gen_Hlth = 2, Age_Group = 13) {
   
- High_BP <- factor(High_BP)
- Diff_Walk <- factor(Diff_Walk)
- High_Chol <- factor(High_Chol)
- Heart_Cond <- factor(Heart_Cond)
- Stroke <- factor(Stroke)
- Phys_Act <- factor(Phys_Act)
- Alcohol <- factor(Alcohol)
- BMI <- as.integer(BMI)
- Gen_Hlth <- factor(Gen_Hlth)
- Age_Group <- factor(Age_Group)
+  input <- data.frame(
+    High_BP, Diff_Walk, High_Chol,
+    Heart_Cond, Stroke, Phys_Act,
+    Alcohol, BMI, Gen_Hlth,
+    Age_Group
+  )
   
+  rules <- validator(
+    High_BP %in% c(0,1),
+    Diff_Walk %in% c(0,1),
+    High_Chol %in% c(0,1),
+    Heart_Cond %in% c(0,1),
+    Stroke %in% c(0,1),
+    Phys_Act %in% c(0,1),
+    Alcohol %in% c(0,1),
+    (BMI >= 12) & (BMI <= 98),
+    Gen_Hlth %in% 1:5,
+    Age_Group %in% 1:13
+  )
   
-  newdata <- data.frame(
-    High_BP, 
-    Diff_Walk, 
-    High_Chol,
-    Heart_Cond,
-    Stroke,
-    Phys_Act,
-    Alcohol,
-    BMI, 
-    Gen_Hlth,
-    Age_Group)
+  cf <- confront(input, rules)
+  result <- summary(cf)
   
-  p <- predict(final_model, new_data = newdata)
+  if(any(result$fails > 0)){
+    return(list(error = "Input Error: Validation failed"))
+  }
+
+   
+   newdata <- input |> mutate(across(c('High_BP', 'Diff_Walk', 'High_Chol',
+                      'Heart_Cond', 'Stroke', 'Phys_Act', 'Alcohol', 
+                      'Gen_Hlth', 'Age_Group'), as.factor)) |> 
+     mutate(BMI = as.integer(BMI))
+            
+
+   p <- predict(final_model, new_data = newdata)
 
     if(p == 0){
-    print("Prediction: No Diabetes")
-  } else print("Prediction: Diabetes")
+    print("Prediction: Diabetes")
+  } else print("Prediction: No Diabetes")
   
 
 }

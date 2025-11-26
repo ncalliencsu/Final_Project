@@ -60,14 +60,14 @@
     "href": "Modeling.html#define-random-forest-rf-model-and-engine",
     "title": "Modeling",
     "section": "Define Random Forest (RF) Model and Engine",
-    "text": "Define Random Forest (RF) Model and Engine\n\nRF_model &lt;- rand_forest(mode = \"classification\", mtry = tune()) |&gt;\nset_engine(\"ranger\", importance = \"impurity\")"
+    "text": "Define Random Forest (RF) Model and Engine\n\nRF_model &lt;- rand_forest(mode = \"classification\", mtry = tune(), trees = 100) |&gt;\nset_engine(\"ranger\", importance = \"impurity\")"
   },
   {
     "objectID": "Modeling.html#create-workflow-for-rf-model",
     "href": "Modeling.html#create-workflow-for-rf-model",
     "title": "Modeling",
     "section": "Create Workflow for RF Model",
-    "text": "Create Workflow for RF Model\n\nRF_wkf &lt;- workflow() |&gt; \n  add_recipe(recipe1) |&gt;\nadd_model(RF_model)\n\nsaveRDS(RF_wkf,file = \"RF_wkf_out.RDS\")"
+    "text": "Create Workflow for RF Model\n\nRF_wkf &lt;- workflow() |&gt; \n  add_recipe(recipe1) |&gt;\nadd_model(RF_model)"
   },
   {
     "objectID": "Modeling.html#fit-the-rf-model-to-cv-folds",
@@ -123,13 +123,13 @@
     "href": "Modeling.html#compare-both-models-on-the-test-set",
     "title": "Modeling",
     "section": "Compare Both Models on the Test Set",
-    "text": "Compare Both Models on the Test Set\n\nrbind(CLTREE_final |&gt; compute_metrics(metric_set(mn_log_loss)),\n          RF_final |&gt; compute_metrics(metric_set(mn_log_loss)))\n\n# A tibble: 2 × 4\n  .metric     .estimator .estimate .config             \n  &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;               \n1 mn_log_loss binary         0.337 Preprocessor1_Model1\n2 mn_log_loss binary         0.317 Preprocessor1_Model1\n\n\nThe Random Forest Model has a mean log loss of 0.317 vs. 0.337 for the Classification Tree. Therefore, the Random Forest Model is the more accurate model. We will save the best RF Model for use in the API.R file. Let’s look at the plot for the variable importance plot for that model."
+    "text": "Compare Both Models on the Test Set\n\nrbind(CLTREE_final |&gt; compute_metrics(metric_set(mn_log_loss)),\n          RF_final |&gt; compute_metrics(metric_set(mn_log_loss)))\n\n# A tibble: 2 × 4\n  .metric     .estimator .estimate .config             \n  &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;               \n1 mn_log_loss binary         0.337 Preprocessor1_Model1\n2 mn_log_loss binary         0.318 Preprocessor1_Model1\n\n\nThe Random Forest Model has a mean log loss of 0.317 vs. 0.337 for the Classification Tree. Therefore, the Random Forest Model is the more accurate model. We will save the best RF Model for use in the API.R file. Let’s look at the plot for the variable importance plot for that model."
   },
   {
     "objectID": "Modeling.html#plot-variable-importance-for-rf-model",
     "href": "Modeling.html#plot-variable-importance-for-rf-model",
     "title": "Modeling",
     "section": "Plot Variable Importance for RF Model",
-    "text": "Plot Variable Importance for RF Model\n\nRF_final |&gt;\n  extract_fit_parsnip() |&gt;\n  vip(num_features = 10)\n\n\n\n\n\n\n\n\n\nsaveRDS(RF_best, file = \"RF_model_out.RDS\")"
+    "text": "Plot Variable Importance for RF Model\n\nRF_final |&gt;\n  extract_fit_parsnip() |&gt;\n  vip(num_features = 10)\n\n\n\n\n\n\n\n\n\nfinal_model &lt;- RF_wkf |&gt;\n  finalize_workflow(RF_best) |&gt;\n  fit(df)\n\n\nsaveRDS(final_model, file = \"final_model.RDS\")"
   }
 ]
