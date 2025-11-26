@@ -282,27 +282,27 @@ ggplot(data = df, aes(x= Diabetes , fill = Sex )) +
   labs(title = "Count of Diabetes by Sex", x = "Diabetes", y = "Count by Sex")
 
 #Box Plots
-ggplot(df, aes(x = Age_Group , y = Diabetes )) +
-  geom_boxplot() + labs(title = "Boxplot of Diabetes by Age Group", x = "Age Group", y = "Diabetes") +
-  scale_x_discrete(breaks=seq(min(as.numeric(df$Age_Group)),max(as.numeric(df$Age_Group)),by=1))
+ggplot(data = df, aes(x = as.numeric(Age_Group) , y = Diabetes )) +
+  geom_boxplot() + labs(title = "Boxplot of Diabetes by Age Group", x = "Age Group", y = "Diabetes")  +
+  scale_x_continuous(breaks = c(1:13))
 
 ggplot(df, aes(x = BMI , y = Diabetes )) +
   geom_boxplot() + labs(title = "Boxplot of Diabetes by BMI", x = "BMI", y = "Diabetes")
 
-ggplot(df, aes(x= Age_Group, y= Diabetes)) +
+ggplot(df, aes(x= as.numeric(Age_Group), y= Diabetes)) +
  geom_boxplot(notch=FALSE, outlier.shape=NA, fill="red", alpha=0.1)+
  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  scale_x_discrete(breaks=seq(min(as.numeric(df$Age_Group)),max(as.numeric(df$Age_Group)),by=1))  + 
+  scale_x_continuous(breaks = c(1:13))  + 
   
  facet_wrap(. ~ Education, scales = "free_y") +
   theme(axis.text.x = element_text(angle = 90, vjust=.5, hjust=1)) + 
   labs(title = "Boxplots of Diabetes by Age Group and Education", x = "Age Group", y = "Diabetes")
 
 
-ggplot(df, aes(x= Age_Group, y= Diabetes)) +
+ggplot(df, aes(x= as.numeric(Age_Group), y= Diabetes)) +
  geom_boxplot(notch=FALSE, outlier.shape=NA, fill="red", alpha=0.1)+
- theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  scale_x_discrete(breaks=seq(min(as.numeric(df$Age_Group)),max(as.numeric(df$Age_Group)),by=1))  + 
+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))  +
+  scale_x_continuous(breaks = c(1:13))  + 
   
  facet_wrap(. ~ Income, scales = "free_y") +
   theme(axis.text.x = element_text(angle = 90, vjust=.5, hjust=1)) + 
