@@ -126,11 +126,13 @@ The Classification Tree is built step by step (recursively):
 
 ```{r Import the Data}
 
-library(recipes)
-library(tidyverse)
-library(tidymodels)
-library(tree) 
-library(future)
+library(future) #for multithread
+library(recipes) #for recipe building
+library(tidyverse) #for tidy framework
+library(tidymodels) #tidy models framework
+library(tree) #for classification trees
+library(vip) #for variable importance for RF Model
+
 
 plan(multisession, workers = 10)  # Use 10 cores
 
@@ -260,15 +262,23 @@ RF_final <- RF_wkf |>
   last_fit(df_split)
 ```
 
-# Compare Both Models on the Test Set
+## Compare Both Models on the Test Set
 
 ```{r Compare Both Models on Test Set}
 rbind(CLTREE_final |> compute_metrics(metric_set(mn_log_loss)),
           RF_final |> compute_metrics(metric_set(mn_log_loss)))
 ```
 
-The Random Forest Model has a mean log loss of 0.317 vs. 0.337 for the Classification Tree. Therefore, the Random Forest Model is the more accurate model. We will save the best RF Model for use in the API.R file.
+The Random Forest Model has a mean log loss of 0.317 vs. 0.337 for the Classification Tree. Therefore, the Random Forest Model is the more accurate model. We will save the best RF Model for use in the API.R file. Let's look at the plot for the variable importance plot for that model.
 
-```{r Save Best MOdel}
+## Plot Variable Importance for RF Model
+```{r Variable Importance Plot }
+RF_final |>
+  extract_fit_parsnip() |>
+  vip(num_features = 10)
+```
+
+
+```{r Save Best Model}
 saveRDS(RF_best, file = "RF_model_out.RDS")
 ```

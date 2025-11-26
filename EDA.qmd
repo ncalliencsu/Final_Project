@@ -340,6 +340,6 @@ A mosaic plot is a graphical representation of the relationships in a contingenc
 
 ## Link to Modeling Page
 
-[Click Here for Modeling Page](https://www.example.com)
+[Click Here for Modeling Page](https://ncalliencsu.github.io/Final_Project/Modeling.html)
 
 

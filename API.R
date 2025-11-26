@@ -42,9 +42,9 @@ final_model <- RF_wkf_in |>
 
 function(msg = "Metadata for Final Project") {
     list(msg = paste("Norman C. Allie"),
-         msg = paste("URL for rendered github pages site "))
+         msg = paste("https://ncalliencsu.github.io/Final_Project/EDA.html"))
 }
-#http://
+
 
 
 #* Prediction Endpoint

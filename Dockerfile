@@ -6,7 +6,7 @@ RUN apt-get update -qq && apt-get install -y  libssl-dev  libcurl4-gnutls-dev  l
     
     
 # install plumber, tidymodels
-RUN R -e "install.packages(c('tidymodels', 'plumber'))"
+RUN R -e "install.packages(c('tidymodels', 'plumber', 'ranger'))"
 
 # copy API.R from the current directory into the container
 COPY API.R API.R
