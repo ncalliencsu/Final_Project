@@ -171,15 +171,18 @@ two_way_tab <- function(var1 = "Diabetes", var2 = "HighBP"){
           ) %>%
           tab_header(
             title = paste("2-Way Contingency Table for", var1, "and", var2)
-          ) 
+          )
+          
+        ctab2 |> as_raw_html()
 
-        print(ctab2)
+        print(ctab2) 
  }
 
  for(i in colnames(df[-1])){
     two_way_tab("Diabetes", i )
  }
 ```
+
 I developed code that generated 2 -Way Contingency Tables for all the variables against Diabetes, but they would not render to HTML. So, I left the code in the document but set eval = FALSE. If you run the code chunk for Categorical Variables Summaries you can have a look at the Tables and look for differences in percentages in the rows between Diabetes = 0 and Diabetes = 1.
 
 ## Summary Statistics
@@ -187,10 +190,11 @@ I developed code that generated 2 -Way Contingency Tables for all the variables 
 ```{r Summary Statistics}
 summary(df, maxsum = 30)
 ```
-The summary statistics function is very nice here.  It shows all the counts for each factor variable by level and summary statistics for the three integer variables. Notice the Education and Income are both skewed to the higher brackets. We can also see the study has a lot more women than men in the sample. The percentages are more interesting but I cannot get them to render in HTML.
 
+The summary statistics function is very nice here. It shows all the counts for each factor variable by level and summary statistics for the three integer variables. Notice the Education and Income are both skewed to the higher brackets. We can also see the study has a lot more women than men in the sample. The percentages are more interesting but I cannot get them to render in HTML.
 
 ## Correlations
+
 ```{r Correlations}
 
 #Tetrachoric Correlation Matrix for Binary Variables
