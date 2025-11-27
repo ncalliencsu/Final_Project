@@ -217,9 +217,11 @@ scale 1-8m<br>
 <li>basic validation of the data,</li>
 <li>determine rate of missing values.</li>
 <li>assign appropriate types to variables,</li>
-<li>Investigate distributions ▪ Univariate measures/graphs ▪ Multivariate measures/graphs</li>
+<li>Investigate distributions<br>
+▪ Univariate measures/graphs<br>
+▪ Multivariate measures/graphs</li>
 </ul>
-<p>The goal of the EDA is to inform the modeling process in the selection of model types.</p>
+<p>The goal of the EDA is to inform the modeling process in the selection of predictor variables.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(janitor)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -289,8 +291,8 @@ Attaching package: 'janitor'</code></pre>
 </div>
 <p>The structure of the data reveals that all variables are assumed to be integers. Here is the conversion plan for the variables:</p>
 <p>Columns 1-4, 6-14, 18 and 19 will be converted to 2-level factors.<br>
-Columns 15, 21 and 22 will be converted to ordered factors.<br>
-The remaining columns will be left as integers. Some columns will be renamed for readability.</p>
+Columns 15, 20, 21 and 22 will be converted to ordered factors.<br>
+BMI, Mental Health and Physical Health will be left as type integer. Most columns will be renamed for readability.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> data_00 <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,<span class="dv">6</span><span class="sc">:</span><span class="dv">14</span>,<span class="dv">18</span>,<span class="dv">19</span>), as.factor))<span class="sc">|&gt;</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="dv">15</span>,<span class="dv">20</span>,<span class="dv">21</span>,<span class="dv">22</span>), as_factor)) <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">Diabetes =</span> Diabetes_binary, <span class="at">Heart_Cond =</span> HeartDiseaseorAttack, <span class="at">Phys_Act =</span> PhysActivity, <span class="at">Alcohol =</span> HvyAlcoholConsump, <span class="at">Health_Ins =</span> AnyHealthcare, <span class="at">Doctor_Cost =</span> NoDocbcCost, <span class="at">Gen_Hlth =</span> GenHlth, <span class="at">Mental_Hlth =</span> MentHlth, <span class="at">Phys_Hlth =</span> PhysHlth, <span class="at">Diff_Walk =</span> DiffWalk, <span class="at">High_BP =</span> HighBP, <span class="at">High_Chol =</span> HighChol, <span class="at">Age_Group =</span> Age, <span class="at">Chol_Check =</span> CholCheck) </span>
@@ -382,7 +384,7 @@ Income*         -0.28 0.00</code></pre>
  $ Income     : Factor w/ 8 levels "1","2","3","4",..: 3 1 8 6 4 8 7 4 1 3 ...</code></pre>
 </div>
 </div>
-<p>After review of the dataset data_01, in which many variables have been converted to factors, there are no missing values and the mins and maxes seem to be reasonable. The data was advertised as clean so this is what we would expect.</p>
+<p>After review of the dataset data_00, in which many variables have been converted to factors, there are no missing values and the mins and maxes seem to be reasonable. The data was advertised as clean so this is what we would expect.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#2 Way Contingency Tables of Diabetes vs. Predictor Variables</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -414,11 +416,11 @@ Income*         -0.28 0.00</code></pre>
 <span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">two_way_tab</span>(<span class="st">"Diabetes"</span>, i )</span>
 <span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a> }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>I developed code that generated 2 -Way Contingency Tables for all the variables against Diabetes, but they would not render to HTML. So, I left the code in the document but set eval = FALSE. If you run the code chunk for Categorical Variables Summaries you can have a look at the Tables and look for differences in percentages in the rows between Diabetes = 0 and Diabetes = 1.</p>
 <section id="summary-statistics" class="level2">
 <h2 class="anchored" data-anchor-id="summary-statistics">Summary Statistics</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Numeric Summaries</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(df, <span class="at">maxsum =</span> <span class="dv">30</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> Diabetes   High_BP    High_Chol  Chol_Check      BMI        Smoker    
  0:218334   0:144851   0:146089   0:  9470   Min.   :12.00   0:141257  
@@ -428,9 +430,21 @@ Income*         -0.28 0.00</code></pre>
                                              3rd Qu.:31.00             
                                              Max.   :98.00             
                                                                        
+                                                                       
+                                                                       
+                                                                       
+                                                                       
+                                                                       
+                                                                       
  Stroke     Heart_Cond Phys_Act   Fruits     Veggies    Alcohol    Health_Ins
  0:243388   0:229787   0: 61760   0: 92782   0: 47839   0:239424   0: 12417  
  1: 10292   1: 23893   1:191920   1:160898   1:205841   1: 14256   1:241263  
+                                                                             
+                                                                             
+                                                                             
+                                                                             
+                                                                             
+                                                                             
                                                                              
                                                                              
                                                                              
@@ -444,21 +458,37 @@ Income*         -0.28 0.00</code></pre>
              5:12081   3rd Qu.: 2.000   3rd Qu.: 3.000                        
                        Max.   :30.000   Max.   :30.000                        
                                                                               
-   Age_Group     Education      Income     
- 9      :33244   1:   174   8      :90385  
- 10     :32194   2:  4043   7      :43219  
- 8      :30832   3:  9478   6      :36470  
- 7      :26314   4: 62750   5      :25883  
- 11     :23533   5: 69910   4      :20135  
- 6      :19819   6:107325   3      :15994  
- (Other):87744              (Other):21594  </code></pre>
+                                                                              
+                                                                              
+                                                                              
+                                                                              
+                                                                              
+                                                                              
+ Age_Group  Education  Income   
+ 1 : 5700   1:   174   1: 9811  
+ 2 : 7598   2:  4043   2:11783  
+ 3 :11123   3:  9478   3:15994  
+ 4 :13823   4: 62750   4:20135  
+ 5 :16157   5: 69910   5:25883  
+ 6 :19819   6:107325   6:36470  
+ 7 :26314              7:43219  
+ 8 :30832              8:90385  
+ 9 :33244                       
+ 10:32194                       
+ 11:23533                       
+ 12:15980                       
+ 13:17363                       </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Correlation Statistics</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co">#Tetrachoric Correlation Matrix for Binary Variables</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>df_binary <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,<span class="dv">6</span><span class="sc">:</span><span class="dv">14</span>,<span class="dv">18</span>,<span class="dv">19</span>), as.numeric)) <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,<span class="dv">6</span><span class="sc">:</span><span class="dv">14</span>,<span class="dv">18</span>,<span class="dv">19</span>)) </span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>                          </span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>tetra_corr <span class="ot">&lt;-</span> <span class="fu">tetrachoric</span>(df_binary)<span class="sc">$</span>rho</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The summary statistics function is very nice here. It shows all the counts for each factor variable by level and summary statistics for the three integer variables. Notice the Education and Income are both skewed to the higher brackets. We can also see the study has a lot more women than men in the sample. The percentages are more interesting but I cannot get them to render in HTML.</p>
+</section>
+<section id="correlations" class="level2">
+<h2 class="anchored" data-anchor-id="correlations">Correlations</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Tetrachoric Correlation Matrix for Binary Variables</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>df_binary <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,<span class="dv">6</span><span class="sc">:</span><span class="dv">14</span>,<span class="dv">18</span>,<span class="dv">19</span>), as.numeric)) <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,<span class="dv">6</span><span class="sc">:</span><span class="dv">14</span>,<span class="dv">18</span>,<span class="dv">19</span>)) </span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>                          </span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>tetra_corr <span class="ot">&lt;-</span> <span class="fu">tetrachoric</span>(df_binary)<span class="sc">$</span>rho</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="st">"Tetrachoric Correlation Matrix"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -553,10 +583,9 @@ Education   -0.12445597
 Income      -0.16391879</code></pre>
 </div>
 </div>
-<p>I developed code that generated 2 -Way Contingency Tables for all the variables against Diabetes, but they would not render to HTML. So, I left the code in the document but set eval = FALSE. If you run the code chunk for Categorical Variables Summaries you can have a look at the Tables and look for differences in percentages in the rows between Diabetes = 0 and Diabetes = 1.</p>
-<p>I did perform correlation studies. Tetrachoric correlation is a measure of the correlation between two binary variables. This type of correlation is often used in surveys and personality tests in which the questions being asked only have two possible response values. The value for a tetrachoric correlation can range from -1 to 1 where:</p>
+<p>Tetrachoric correlation is a measure of the correlation between two binary variables. This type of correlation is often used in surveys and personality tests in which the questions being asked only have two possible response values. The value for a tetrachoric correlation can range from -1 to 1 where:</p>
 <p>-1 indicates a strong negative correlation between the two variables. 0 indicates no correlation between the two variables. (Statology.org)</p>
-<p>From inspection of the Tetrachoric Correlation Matrix, there appears to be some moderate correlation between Diabetes and the following binary predictor variables:</p>
+<p>From inspection of the Tetrachoric Correlation Matrix, there appears to be moderate correlation between Diabetes and the following binary predictor variables:</p>
 <ul>
 <li>High_BP (50%)</li>
 <li>Diff_Walk (41%)</li>
@@ -568,12 +597,12 @@ Income      -0.16391879</code></pre>
 </ul>
 <p>Point-biserial correlation is used to measure the relationship between a binary variable, x, and a continuous variable, y. Similar to the Pearson correlation coefficient, the point-biserial correlation coefficient takes on a value between -1 and 1 where:</p>
 <p>-1 indicates a perfectly negative correlation between two variables 0 indicates no correlation between two variables 1 indicates a perfectly positive correlation between two variables (Statology.org)</p>
-<p>From inspection of the Point-biserial correlation matrix, there appears to be some moderate correlation between Diabetes and the following ordinal and continuous predictor variables:</p>
+<p>From inspection of the Point-biserial correlation matrix, there appears to be moderate correlation between Diabetes and the following ordinal and continuous predictor variables:</p>
 <ul>
 <li>BMI(22%)</li>
 <li>Gen_Hlth(29%)</li>
 </ul>
-<p>For all of my assessments here on correlation, I used 20% as the cutoff, which is still not a strong correlation. The strongest correlations with Diabetes from this data are High Blood Pressure, High Cholesterol, Heart Condition and Difficulty Walking. Note that all these have correlations with each other at approximately 40% levels. I am not sure if this is enough to collapse them into one variable.</p>
+<p>For all of my assessments here on correlation, I used 20% as the cutoff, which is still not a strong correlation. The strongest correlations with Diabetes from this data are High Blood Pressure, High Cholesterol, Heart Condition and Difficulty Walking. Note that all these have correlations with each other at approximately 40% levels. I am not sure if this is enough to collapse them into one variable and is a good question for Office Hours.</p>
 </section>
 <section id="graphical-summaries" class="level2">
 <h2 class="anchored" data-anchor-id="graphical-summaries">Graphical Summaries</h2>
@@ -768,8 +797,8 @@ Income      -0.16391879</code></pre>
 </div>
 </div>
 </div>
-<p>The histograms show something interesting. From inspection of the Income and Education Histograms, it appears as though there is a bias in the sample toward higher education and higher income individuals. I cannot imagine that was a desired outcome, but it looks like a defect in the sampling plan.</p>
-<p>The Bar Plots show what we expect with HighBP having an effect on Diabetes. We can also see that Sex does not seem to have much of an effect, and it could be argued that Alcohol has a positive effect on the Diabetes out come.</p>
+<p>The histograms show something interesting. From inspection of the Income and Education Histograms, it appears as though there is a bias in the sample toward higher education and higher income individuals. I cannot imagine that was a desired outcome of the sampling plan but this seems to be the case.</p>
+<p>The Bar Plots show what we expect with High_BP having an effect on Diabetes. We can also see that Sex does not seem to have much of an effect, and it could be argued that Alcohol has a positive effect on the Diabetes outcome.</p>
 <p>The Box Plots of Diabetes vs.&nbsp;Age and Income seem to show a different picture than the Mosaic Plots. Here, on the faceted Boxplot of Diabetes vs.&nbsp;Age and Income it is not really discernible if there is a difference. The Box Plot of Diabetes vs.&nbsp;BMI suggests that BMI does not have a strong impact on Diabetes. The Boxplot of Diabetes vs Age suggests that Age does have an effect on Diabetes and this agrees with the Mosaic Plot.</p>
 <p>A mosaic plot is a graphical representation of the relationships in a contingency table, showing the proportions of combinations of categorical variables as tiles. It’s useful for visualizing associations between two or more categorical variables. The mosaic plot for Income and Diabetes shows a trend in higher incidence of Diabetes for lower income individuals. With the sample bias toward higher income individuals, the relationship of Diabetes to Income might be much greater than we see in this survey.</p>
 </section>

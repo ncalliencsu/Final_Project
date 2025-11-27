@@ -108,9 +108,11 @@ The objectives of the EDA are:
 -   basic validation of the data,
 -   determine rate of missing values.
 -   assign appropriate types to variables,
--   Investigate distributions ▪ Univariate measures/graphs ▪ Multivariate measures/graphs
+-   Investigate distributions\
+    ▪ Univariate measures/graphs\
+    ▪ Multivariate measures/graphs
 
-The goal of the EDA is to inform the modeling process in the selection of model types.
+The goal of the EDA is to inform the modeling process in the selection of predictor variables.
 
 ```{r libraries}
 
@@ -133,8 +135,8 @@ str(data_00)
 The structure of the data reveals that all variables are assumed to be integers. Here is the conversion plan for the variables:
 
 Columns 1-4, 6-14, 18 and 19 will be converted to 2-level factors.\
-Columns 15, 21 and 22 will be converted to ordered factors.\
-The remaining columns will be left as integers. Some columns will be renamed for readability.
+Columns 15, 20, 21 and 22 will be converted to ordered factors.\
+BMI, Mental Health and Physical Health will be left as type integer. Most columns will be renamed for readability.
 
 ```{r Assign Appropriate Data Types}
 df <- data_00 |> mutate(across(c(1:4,6:14,18,19), as.factor))|>
@@ -145,7 +147,7 @@ colSums(is.na(df))
 str(df)
 ```
 
-After review of the dataset data_01, in which many variables have been converted to factors, there are no missing values and the mins and maxes seem to be reasonable. The data was advertised as clean so this is what we would expect.
+After review of the dataset data_00, in which many variables have been converted to factors, there are no missing values and the mins and maxes seem to be reasonable. The data was advertised as clean so this is what we would expect.
 
 ```{r Categorical Variable Summaries, eval=FALSE}
 #2 Way Contingency Tables of Diabetes vs. Predictor Variables
@@ -178,14 +180,18 @@ two_way_tab <- function(var1 = "Diabetes", var2 = "HighBP"){
     two_way_tab("Diabetes", i )
  }
 ```
+I developed code that generated 2 -Way Contingency Tables for all the variables against Diabetes, but they would not render to HTML. So, I left the code in the document but set eval = FALSE. If you run the code chunk for Categorical Variables Summaries you can have a look at the Tables and look for differences in percentages in the rows between Diabetes = 0 and Diabetes = 1.
 
 ## Summary Statistics
+
 ```{r Summary Statistics}
+summary(df, maxsum = 30)
+```
+The summary statistics function is very nice here.  It shows all the counts for each factor variable by level and summary statistics for the three integer variables. Notice the Education and Income are both skewed to the higher brackets. We can also see the study has a lot more women than men in the sample. The percentages are more interesting but I cannot get them to render in HTML.
 
-# Numeric Summaries
-summary(df)
 
-#Correlation Statistics
+## Correlations
+```{r Correlations}
 
 #Tetrachoric Correlation Matrix for Binary Variables
 df_binary <- df |> mutate(across(c(1:4,6:14,18,19), as.numeric)) |> select(c(1:4,6:14,18,19)) 
@@ -222,13 +228,11 @@ print(pbs_cor_matrix)
 
 ```
 
-I developed code that generated 2 -Way Contingency Tables for all the variables against Diabetes, but they would not render to HTML.  So, I left the code in the document but set eval = FALSE. If you run the code chunk for Categorical Variables Summaries you can have a look at the Tables and look for differences in percentages in the rows between Diabetes = 0 and Diabetes = 1.
-
-I did perform correlation studies. Tetrachoric correlation is a measure of the correlation between two binary variables. This type of correlation is often used in surveys and personality tests in which the questions being asked only have two possible response values. The value for a tetrachoric correlation can range from -1 to 1 where:
+Tetrachoric correlation is a measure of the correlation between two binary variables. This type of correlation is often used in surveys and personality tests in which the questions being asked only have two possible response values. The value for a tetrachoric correlation can range from -1 to 1 where:
 
 -1 indicates a strong negative correlation between the two variables. 0 indicates no correlation between the two variables. (Statology.org)
 
-From inspection of the Tetrachoric Correlation Matrix, there appears to be some moderate correlation between Diabetes and the following binary predictor variables:
+From inspection of the Tetrachoric Correlation Matrix, there appears to be moderate correlation between Diabetes and the following binary predictor variables:
 
 -   High_BP (50%)
 -   Diff_Walk (41%)
@@ -238,19 +242,19 @@ From inspection of the Tetrachoric Correlation Matrix, there appears to be some 
 -   Phys_Act (-23%)
 -   Alcohol (-23%)
 
-
 Point-biserial correlation is used to measure the relationship between a binary variable, x, and a continuous variable, y. Similar to the Pearson correlation coefficient, the point-biserial correlation coefficient takes on a value between -1 and 1 where:
 
 -1 indicates a perfectly negative correlation between two variables 0 indicates no correlation between two variables 1 indicates a perfectly positive correlation between two variables (Statology.org)
 
-From inspection of the Point-biserial correlation matrix, there appears to be some moderate correlation between Diabetes and the following ordinal and continuous predictor variables:
+From inspection of the Point-biserial correlation matrix, there appears to be moderate correlation between Diabetes and the following ordinal and continuous predictor variables:
 
 -   BMI(22%)
 -   Gen_Hlth(29%)
 
-For all of my assessments here on correlation, I used 20% as the cutoff, which is still not a strong correlation. The strongest correlations with Diabetes from this data are High Blood Pressure, High Cholesterol, Heart Condition and Difficulty Walking. Note that all these have correlations with each other at approximately 40% levels. I am not sure if this is enough to collapse them into one variable.
+For all of my assessments here on correlation, I used 20% as the cutoff, which is still not a strong correlation. The strongest correlations with Diabetes from this data are High Blood Pressure, High Cholesterol, Heart Condition and Difficulty Walking. Note that all these have correlations with each other at approximately 40% levels. I am not sure if this is enough to collapse them into one variable and is a good question for Office Hours.
 
 ## Graphical Summaries
+
 ```{r Graphical Summaries}
     
 #Histograms of Ordinal and Continuous Variables
@@ -330,9 +334,9 @@ mosaic(data = df, ~ Age_Group + Diabetes, highlighting = "Diabetes",
        main = "Mosaic Plot of Diabetes and Age Group")
 ```
 
-The histograms show something interesting. From inspection of the Income and Education Histograms, it appears as though there is a bias in the sample toward higher education and higher income individuals. I cannot imagine that was a desired outcome, but it looks like a defect in the sampling plan.
+The histograms show something interesting. From inspection of the Income and Education Histograms, it appears as though there is a bias in the sample toward higher education and higher income individuals. I cannot imagine that was a desired outcome of the sampling plan but this seems to be the case.
 
-The Bar Plots show what we expect with HighBP having an effect on Diabetes. We can also see that Sex does not seem to have much of an effect, and it could be argued that Alcohol has a positive effect on the Diabetes out come.
+The Bar Plots show what we expect with High_BP having an effect on Diabetes. We can also see that Sex does not seem to have much of an effect, and it could be argued that Alcohol has a positive effect on the Diabetes outcome.
 
 The Box Plots of Diabetes vs. Age and Income seem to show a different picture than the Mosaic Plots. Here, on the faceted Boxplot of Diabetes vs. Age and Income it is not really discernible if there is a difference. The Box Plot of Diabetes vs. BMI suggests that BMI does not have a strong impact on Diabetes. The Boxplot of Diabetes vs Age suggests that Age does have an effect on Diabetes and this agrees with the Mosaic Plot.
 
@@ -341,5 +345,3 @@ A mosaic plot is a graphical representation of the relationships in a contingenc
 ## Link to Modeling Page
 
 [Click Here for Modeling Page](https://ncalliencsu.github.io/Final_Project/Modeling.html)
-
-
